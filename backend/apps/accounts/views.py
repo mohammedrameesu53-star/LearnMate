@@ -1,4 +1,4 @@
-from    .views import APIView
+from rest_framework.views import APIView
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status 
@@ -14,6 +14,8 @@ import qrcode
 import base64
 from io import BytesIO
 from rest_framework.permissions import IsAuthenticated
+from datetime import timedelta
+from django.utils import timezone
 
 
 
@@ -63,7 +65,6 @@ class SendOTPView(APIView):
             user=user,
             code=otp_code
         )
-
         send_mail(
             subject='LearnMate Verification',
             message=f'Your OTP is {otp_code}',
@@ -71,7 +72,6 @@ class SendOTPView(APIView):
             recipient_list=[email],
             fail_silently=False,
         )
-
         return Response(
             {
                 'message': 'OTP sent successfully'
@@ -120,6 +120,10 @@ class VerifyOTPView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
+        expiry_time = otp_obj.created_at + timedelta(minutes=5)
+        if timezone.now() > expiry_time:
+            return Response({"message": "OTP has expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)    
 
         otp_obj.is_used = True
 
@@ -133,130 +137,158 @@ class VerifyOTPView(APIView):
             {
                 "message": "Email verified successfully"
             }
-        )            
+        )  
+        
+class ResendOTPView(APIView):
+    
+    def post(self, request):
+        serializer = SendOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        if user.is_verified:
+            return Response({"message": "Email is already verified"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate fresh OTP
+        otp_code = generate_otp()
+        OTP.objects.create(user=user, code=otp_code)
+
+        send_mail(
+            subject='LearnMate - Resend Verification Code',
+            message=f'Your new verification OTP is {otp_code}. It will expire in 5 minutes.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        return Response({'message': 'A fresh OTP has been sent to your email.'}, status=status.HTTP_200_OK)        
+                  
         
         
 # Two factor authentication  
         
-class LoginView(APIView):
+# class LoginView(APIView):
 
-    def post(self, request):
+#     def post(self, request):
 
-        serializer = LoginSerializer(
-            data=request.data
-        )
+#         serializer = LoginSerializer(
+#             data=request.data
+#         )
 
-        serializer.is_valid(
-            raise_exception=True
-        )
+#         serializer.is_valid(
+#             raise_exception=True
+#         )
 
-        email = serializer.validated_data["email"]
-        password = serializer.validated_data["password"]
+#         email = serializer.validated_data["email"]
+#         password = serializer.validated_data["password"]
 
-        user = authenticate(
-            email=email,
-            password=password
-        )
+#         user = authenticate(
+#             email=email,
+#             password=password
+#         )
 
-        if user is None:
-            return Response(
-                {
-                    "message": "Invalid credentials"
-                },
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+#         if user is None:
+#             return Response(
+#                 {
+#                     "message": "Invalid credentials"
+#                 },
+#                 status=status.HTTP_401_UNAUTHORIZED
+#             )
 
-        if not user.is_verified:
-            return Response(
-                {
-                    "message": "Please verify your email first"
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#         if not user.is_verified:
+#             return Response(
+#                 {
+#                     "message": "Please verify your email first"
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        otp_code = generate_otp()
+#         otp_code = generate_otp()
 
-        OTP.objects.create(
-            user=user,
-            code=otp_code,
-            otp_type="login"
-        )
+#         OTP.objects.create(
+#             user=user,
+#             code=otp_code,
+#             otp_type="login"
+#         )
 
-        send_mail(
-            subject="LearnMate Login OTP",
-            message=f"Your login OTP is {otp_code}",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=False
-        )
+#         send_mail(
+#             subject="LearnMate Login OTP",
+#             message=f"Your login OTP is {otp_code}",
+#             from_email=settings.DEFAULT_FROM_EMAIL,
+#             recipient_list=[email],
+#             fail_silently=False
+#         )
 
-        return Response(
-            {
-                "message": "Login OTP sent successfully"
-            },
-            status=status.HTTP_200_OK
-        )
+#         return Response(
+#             {
+#                 "message": "Login OTP sent successfully"
+#             },
+#             status=status.HTTP_200_OK
+#         )
         
-class VerifyLoginOTPView(APIView):
+# class VerifyLoginOTPView(APIView):
 
-    def post(self, request):
+#     def post(self, request):
 
-        serializer = VerifyLoginOTPSerializer(
-            data=request.data
-        )
+#         serializer = VerifyLoginOTPSerializer(
+#             data=request.data
+#         )
 
-        serializer.is_valid(
-            raise_exception=True
-        )
+#         serializer.is_valid(
+#             raise_exception=True
+#         )
 
-        email = serializer.validated_data["email"]
-        otp = serializer.validated_data["otp"]
+#         email = serializer.validated_data["email"]
+#         otp = serializer.validated_data["otp"]
 
-        try:
-            user = User.objects.get(
-                email=email
-            )
+#         try:
+#             user = User.objects.get(
+#                 email=email
+#             )
 
-        except User.DoesNotExist:
+#         except User.DoesNotExist:
 
-            return Response(
-                {
-                    "message": "User not found"
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
+#             return Response(
+#                 {
+#                     "message": "User not found"
+#                 },
+#                 status=status.HTTP_404_NOT_FOUND
+#             )
 
-        otp_obj = OTP.objects.filter(
-            user=user,
-            code=otp,
-            otp_type="login",
-            is_used=False
-        ).last()
+#         otp_obj = OTP.objects.filter(
+#             user=user,
+#             code=otp,
+#             otp_type="login",
+#             is_used=False
+#         ).last()
 
-        if not otp_obj:
+#         if not otp_obj:
 
-            return Response(
-                {
-                    "message": "Invalid OTP"
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+#             return Response(
+#                 {
+#                     "message": "Invalid OTP"
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
 
-        otp_obj.is_used = True
-        otp_obj.save()
+#         otp_obj.is_used = True
+#         otp_obj.save()
 
-        refresh = RefreshToken.for_user(user)
+#         refresh = RefreshToken.for_user(user)
 
-        return Response(
-            {
-                "message": "Login successful",
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-                "email": user.email,
-                "role": user.role
-            },
-            status=status.HTTP_200_OK
-        )        
+#         return Response(
+#             {
+#                 "message": "Login successful",
+#                 "access": str(refresh.access_token),
+#                 "refresh": str(refresh),
+#                 "email": user.email,
+#                 "role": user.role
+#             },
+#             status=status.HTTP_200_OK
+#         )        
         
         
 # Reset Password
@@ -367,7 +399,7 @@ class  ResetPasswordView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-
+    
         user.set_password(
             new_password
         )
@@ -387,11 +419,11 @@ class  ResetPasswordView(APIView):
         
         
         
-# MFA (Multi-factor authentication) 
+#  MFA (Multi-factor authentication) - (after enabling MFA)
 
 class SetupMFAView(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]      
 
     def post(self, request):
 
@@ -466,6 +498,108 @@ class VerifyMFASetupView(APIView):
             }
         )        
             
+
+
+# later logins after enabling MFA
+
+class LoginView(APIView):
+
+    def post(self, request):
+
+        serializer = LoginSerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        email = serializer.validated_data["email"]
+
+        password = serializer.validated_data["password"]
+
+        user = authenticate(
+            email=email,
+            password=password
+        )
+
+        if not user:
+
+            return Response(
+                {
+                    "error": "Invalid credentials"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if not user.mfa_enabled:
+
+            return Response(
+                {
+                    "error":
+                    "MFA not enabled"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {
+                "message":
+                "Credentials verified",
+                "email":
+                user.email,
+                "mfa_required":
+                True
+            }
+        )
+        
+class VerifyMFAView(APIView):
+
+    def post(self, request):
+
+        serializer = VerifyMFASerializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        email = serializer.validated_data["email"]
+
+        code = serializer.validated_data["code"]
+
+        user = User.objects.get(
+            email=email
+        )
+
+        totp = pyotp.TOTP(
+            user.mfa_secret
+        )
+
+        if not totp.verify(code):
+
+            return Response(
+                {
+                    "error":
+                    "Invalid MFA code"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        refresh = RefreshToken.for_user(
+            user
+        )
+
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(
+                    refresh.access_token
+                )
+            }
+        )        
+
         
 # RBAC (Role based access control) 
 

@@ -288,6 +288,7 @@ Content-Type: application/json
 
 ### Request
 
+
 ```json
 {
   "email": "john@example.com",

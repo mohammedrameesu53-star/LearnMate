@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import User
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class   RegisterSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(
         write_only=True,
@@ -75,7 +75,15 @@ class VerifyMFASetupSerializer(
         max_length=6
     )
     
-    
+class VerifyMFASerializer(
+    serializers.Serializer
+):
+
+    email = serializers.EmailField()
+
+    code = serializers.CharField(
+        max_length=6
+    )    
 
 
 # Reset Password
