@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from .models import User
+from django.contrib.auth.models import Group
 
 
-class   RegisterSerializer(serializers.ModelSerializer):
+
+class RegisterSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(
         write_only=True,
@@ -28,6 +30,10 @@ class   RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
 
         user.save()
+        
+        group = Group.objects.get( name=user.role.capitalize() ) 
+        
+        user.groups.add(group)  
 
         return user
     
@@ -46,23 +52,7 @@ class VerifyOTPSerializer(serializers.Serializer):
     otp = serializers.CharField(
         max_length=6
     )    
-    
-    
-# Two factor authentication  
-
-class LoginSerializer(serializers.Serializer):
-
-    email = serializers.EmailField()
-
-    password = serializers.CharField()    
-    
-class VerifyLoginOTPSerializer(serializers.Serializer):
-
-    email = serializers.EmailField()
-
-    otp = serializers.CharField(
-        max_length=6
-    )    
+        
     
     
 #  MFA (Multi-factor authentication)    
@@ -70,6 +60,8 @@ class VerifyLoginOTPSerializer(serializers.Serializer):
 class VerifyMFASetupSerializer(
     serializers.Serializer
 ):
+
+    email = serializers.EmailField()
 
     code = serializers.CharField(
         max_length=6
@@ -85,6 +77,15 @@ class VerifyMFASerializer(
         max_length=6
     )    
 
+class LoginSerializer(serializers.Serializer):
+
+    email = serializers.EmailField()
+
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8
+    )
+    
 
 # Reset Password
 
