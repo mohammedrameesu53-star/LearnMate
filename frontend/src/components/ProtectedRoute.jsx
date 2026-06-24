@@ -1,22 +1,20 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  // Retrieve token and user details stored during login execution
-  const token = localStorage.getItem('accessToken');
-  const userRole = localStorage.getItem('userRole'); 
+export default function ProtectedRoute({ children, allowedRoles }) {
+    const token = localStorage.getItem('access_token');
+    const userRole = localStorage.getItem('user_role');
 
-  if (!token) {
-    // Drop user back to login if unauthorized
-    return <Navigate to="/login" replace />;
-  }
+    // Not logged in? Boot back to login
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    // Fallback route if a student tries to navigate to an admin route
-    return <Navigate to="/login" replace />;
-  }
+    // Role unauthorized? Boot to login or error
+    if (allowedRoles && !allowedRoles.includes(userRole)) {
+        return <Navigate to="/login" replace />;
+    }
 
-  return children;
-};
+    return children;
+}
 
-export default ProtectedRoute;

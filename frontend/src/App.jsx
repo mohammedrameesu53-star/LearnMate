@@ -3,23 +3,49 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import ProtectedRoute from './components/ProtectedRoute';
+import StudentDashboard from './pages/dashboards/StudentDashboard';
+import MentorDashboard from './pages/dashboards/MentorDashboard';
+import AdminDashboard from './pages/dashboards/AdminDashboard';
 
 export default function App() {
-  return (
-    <Router>
-      <div className="bg-slate-950 min-h-screen">
-        <Routes>
-          {/* Automatically redirect empty route path '/' to register */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/student" element={<div className="text-white p-8">Welcome to Student Dashboard Content!</div>} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          
-        </Routes>
-      </div>
-    </Router>
-  );
-}
+    return (
+        <Router>
+            <Routes>
+                {/* Auth Routes group */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} /> 
+                <Route path="/forgot-password" element={<ForgotPassword />} /> 
 
+                {/* Role-Specific Protected Dashboards */}
+                <Route 
+                    path="/student-dashboard" 
+                    element={
+                        <ProtectedRoute allowedRoles={['student']}>
+                            <StudentDashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/mentor-dashboard" 
+                    element={
+                        <ProtectedRoute allowedRoles={['mentor']}>
+                            <MentorDashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/admin-dashboard" 
+                    element={
+                        <ProtectedRoute allowedRoles={['admin']}>
+                            <AdminDashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+
+                {/* Default Fallback Redirect to login */}
+                <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+        </Router>
+    );
+}
