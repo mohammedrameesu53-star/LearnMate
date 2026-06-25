@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Local Apps
     'apps.accounts',
     'apps.dashboard',
+    'apps.profiles'
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
