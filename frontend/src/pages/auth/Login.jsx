@@ -3,14 +3,25 @@ import api from '../../api';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     useEffect(() => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-    }, [])
+        const token = localStorage.getItem('access_token');
+        const role = localStorage.getItem('user_role');
+        if (token && role) {
+            if (role === 'admin') {
+                navigate('/admin-dashboard');
+            } else if (role === 'mentor') {
+                navigate('/mentor-dashboard');
+            } else {
+                navigate('/student-dashboard');
+            }
+        }
+    }, [navigate]);
 
     // Step views tracker: 'credentials' or 'mfa_challenge'
     const [loginStep, setLoginStep] = useState('credentials');
@@ -60,10 +71,8 @@ export default function Login() {
                 code: mfaCode
             });
 
-            // Save the received SimpleJWT authorization bearer layout tokens securely
-            localStorage.setItem('access_token', response.data.access);
-            localStorage.setItem('refresh_token', response.data.refresh);
-            localStorage.setItem('user_role', response.data.role);
+            // Save details and initialize profile load
+            await login(response.data.access, response.data.refresh, response.data.role, email);
 
             setMessage('Authentication cleared! Welcome to LearnMate.');
 

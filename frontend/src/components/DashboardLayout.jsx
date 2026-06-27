@@ -1,14 +1,16 @@
-// src/components/DashboardLayout.jsx
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
-export default function DashboardLayout({ role, user, children }) {
+export default function DashboardLayout({ role, user, activeTab, onTabChange, children }) {
   return (
-    <div className="flex">
-      <Sidebar role={role} user={user} />
-      <div className="flex-1 flex flex-col">
-        <Topbar role={role} name={user?.name} avatarUrl={user?.avatarUrl} />
-        <main className="flex-1 bg-gray-50 p-6 overflow-y-auto">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* Sidebar Nav */}
+      <Sidebar role={role} activeTab={activeTab} onTabChange={onTabChange} />
+
+      {/* Main Panel Content Container */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Topbar role={role} user={user} />
+        <main className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
           {children}
         </main>
       </div>

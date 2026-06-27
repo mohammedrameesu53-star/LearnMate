@@ -7,10 +7,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import StudentDashboard from './pages/dashboards/StudentDashboard';
 import MentorDashboard from './pages/dashboards/MentorDashboard';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
+import { AuthProvider } from './context/AuthContext';
 
 export default function App() {
     return (
-        <Router>
+        <AuthProvider>
+            <Router>
             <Routes>
                 {/* Auth Routes group */}
                 <Route path="/login" element={<Login />} />
@@ -47,5 +49,6 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>
+    </AuthProvider>
     );
 }

@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import *
 from .serializers import *
-from apps.accounts.permissions import IsStudent,IsMentor
+from accounts.permissions import IsStudent,IsMentor
 
 class StudentProfileView(APIView):
 

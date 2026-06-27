@@ -45,11 +45,15 @@ api.interceptors.response.use(
           refresh: refreshToken,
         });
 
-        // Pull the new access token out of the response data
+        // Pull the new access token and optional rotated refresh token
         const newAccessToken = response.data.access;
+        const newRefreshToken = response.data.refresh;
 
         // Save it to localStorage for subsequent requests
         localStorage.setItem('access_token', newAccessToken);
+        if (newRefreshToken) {
+          localStorage.setItem('refresh_token', newRefreshToken);
+        }
 
         // Update the failed original request's authorization header with the fresh token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
