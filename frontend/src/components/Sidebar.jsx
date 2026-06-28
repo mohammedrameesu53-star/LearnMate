@@ -1,11 +1,12 @@
 import React from "react";
 import { roleConfig } from "../config/roleConfig";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { HelpCircle, LogOut } from "lucide-react";
 
-export default function Sidebar({ role, activeTab, onTabChange }) {
+export default function Sidebar({ role }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
   const config = roleConfig[role] || { navItems: [] };
 
@@ -34,12 +35,11 @@ export default function Sidebar({ role, activeTab, onTabChange }) {
       {/* Navigation Items */}
       <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
         {config.navItems.map((item) => {
-          const tabId = item.name.toLowerCase().replace(" ", "-");
-          const isActive = activeTab === tabId;
+          const isActive = location.pathname === item.path;
           return (
             <button
               key={item.name}
-              onClick={() => onTabChange(tabId)}
+              onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left cursor-pointer border
                 ${isActive
                   ? "bg-indigo-50/80 text-indigo-600 border-indigo-100 font-semibold shadow-sm"

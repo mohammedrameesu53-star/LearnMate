@@ -1,11 +1,11 @@
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
-export default function DashboardLayout({ role, user, activeTab, onTabChange, children }) {
+export default function DashboardLayout({ role, user, children }) {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar Nav */}
-      <Sidebar role={role} activeTab={activeTab} onTabChange={onTabChange} />
+      <Sidebar role={role} />
 
       {/* Main Panel Content Container */}
       <div className="flex-1 flex flex-col overflow-hidden">

@@ -8,27 +8,20 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     const loadUserProfile = async (role, email) => {
-        const fallbackName = 
-            role === 'student' ? 'Julianne V.' :
-            role === 'mentor' ? 'Dr. Sarah Chen' :
-            'Alex Rivera';
-
-        const fallbackLabel = 
-            role === 'student' ? 'PHYSICS STUDENT' :
-            role === 'mentor' ? 'Senior Mentor' :
-            'Platform Owner';
+        const fallbackName = email ? email.split('@')[0] : 'User';
+        const fallbackLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
 
         const defaultUser = {
             name: fallbackName,
-            email: email || localStorage.getItem('user_email') || 'user@learnmate.com',
+            email: email || localStorage.getItem('user_email') || '',
             role: role,
             label: fallbackLabel,
             avatarUrl: '', // Will use name initials as fallback in UI
-            bio: role === 'student' ? 'Curious student diving deep into Einstein Relativity.' : 'Experienced educator helping students master engineering and science.',
-            grade: role === 'student' ? 'Advanced Physics II' : undefined,
-            learning_goal: role === 'student' ? 'Quantum Mechanics' : undefined,
-            specialization: role === 'mentor' ? 'Advanced Algorithms, AI & Machine Learning' : undefined,
-            experience: role === 'mentor' ? '12 Years' : undefined,
+            bio: '',
+            grade: role === 'student' ? '' : undefined,
+            learning_goal: role === 'student' ? '' : undefined,
+            specialization: role === 'mentor' ? '' : undefined,
+            experience: role === 'mentor' ? '' : undefined,
         };
 
         try {
@@ -39,9 +32,9 @@ export function AuthProvider({ children }) {
                     ...defaultUser,
                     name: response.data.username || defaultUser.name,
                     email: response.data.email || defaultUser.email,
-                    bio: response.data.bio || defaultUser.bio,
-                    grade: response.data.grade || defaultUser.grade,
-                    learning_goal: response.data.learning_goal || defaultUser.learning_goal
+                    bio: response.data.bio !== undefined ? response.data.bio : defaultUser.bio,
+                    grade: response.data.grade !== undefined ? response.data.grade : defaultUser.grade,
+                    learning_goal: response.data.learning_goal !== undefined ? response.data.learning_goal : defaultUser.learning_goal
                 });
             } else if (role === 'mentor') {
                 const response = await api.get('/api/profile/mentor/');
@@ -49,15 +42,15 @@ export function AuthProvider({ children }) {
                     ...defaultUser,
                     name: response.data.username || defaultUser.name,
                     email: response.data.email || defaultUser.email,
-                    specialization: response.data.specialization || defaultUser.specialization,
-                    experience: response.data.experience || defaultUser.experience
+                    specialization: response.data.specialization !== undefined ? response.data.specialization : defaultUser.specialization,
+                    experience: response.data.experience !== undefined ? response.data.experience : defaultUser.experience
                 });
             } else {
                 // Admin has no specific profile endpoint
                 setUser(defaultUser);
             }
         } catch (error) {
-            console.warn("Could not load backend profile details. Using high-fidelity mock fallback:", error);
+            console.warn("Could not load backend profile details:", error);
             setUser(defaultUser);
         }
     };

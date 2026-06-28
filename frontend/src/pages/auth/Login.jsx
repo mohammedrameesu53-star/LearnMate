@@ -14,11 +14,11 @@ export default function Login() {
         const role = localStorage.getItem('user_role');
         if (token && role) {
             if (role === 'admin') {
-                navigate('/admin-dashboard');
+                navigate('/admin/dashboard');
             } else if (role === 'mentor') {
-                navigate('/mentor-dashboard');
+                navigate('/mentor/dashboard');
             } else {
-                navigate('/student-dashboard');
+                navigate('/student/dashboard');
             }
         }
     }, [navigate]);
@@ -81,11 +81,11 @@ export default function Login() {
             setTimeout(() => {
                 // Dynamic redirection based on role
                 if (userRole === 'admin') {
-                    navigate('/admin-dashboard');
+                    navigate('/admin/dashboard');
                 } else if (userRole === 'mentor') {
-                    navigate('/mentor-dashboard');
+                    navigate('/mentor/dashboard');
                 } else {
-                    navigate('/student-dashboard');
+                    navigate('/student/dashboard');
                 }
             }, 1500);
             
