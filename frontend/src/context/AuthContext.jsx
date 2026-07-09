@@ -11,7 +11,22 @@ export function AuthProvider({ children }) {
         const fallbackName = email ? email.split('@')[0] : 'User';
         const fallbackLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
 
+        // Safely extract user ID from JWT access token
+        let jwtUserId = '';
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const decodedPayload = JSON.parse(atob(base64));
+                jwtUserId = decodedPayload.user_id || '';
+            } catch (e) {
+                console.warn("Could not decode user ID from JWT token:", e);
+            }
+        }
+
         const defaultUser = {
+            id: jwtUserId,
             name: fallbackName,
             email: email || localStorage.getItem('user_email') || '',
             role: role,
@@ -30,6 +45,7 @@ export function AuthProvider({ children }) {
                 const response = await api.get('/api/profile/student/');
                 setUser({
                     ...defaultUser,
+                    id: response.data.id || defaultUser.id,
                     name: response.data.username || defaultUser.name,
                     email: response.data.email || defaultUser.email,
                     bio: response.data.bio !== undefined ? response.data.bio : defaultUser.bio,
@@ -40,6 +56,7 @@ export function AuthProvider({ children }) {
                 const response = await api.get('/api/profile/mentor/');
                 setUser({
                     ...defaultUser,
+                    id: response.data.id || defaultUser.id,
                     name: response.data.username || defaultUser.name,
                     email: response.data.email || defaultUser.email,
                     specialization: response.data.specialization !== undefined ? response.data.specialization : defaultUser.specialization,

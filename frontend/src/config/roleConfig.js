@@ -11,7 +11,7 @@ export const roleConfig = {
       { name: "Messages", icon: MessageSquare, path: "/student/messages" },
       { name: "Settings", icon: Settings, path: "/student/settings" },
     ],
-    upgrade: true,
+
   },
   mentor: {
     label: "Mentor",
@@ -23,7 +23,7 @@ export const roleConfig = {
       { name: "Messages", icon: MessageSquare, path: "/mentor/messages" },
       { name: "Settings", icon: Settings, path: "/mentor/settings" },
     ],
-    upgrade: true,
+
   },
   admin: {
     label: "Admin",
@@ -36,6 +36,6 @@ export const roleConfig = {
       { name: "Settings", icon: Settings, path: "/admin/settings" },
       { name: "Users", icon: Users, path: "/admin/users" },
     ],
-    upgrade: true,
+
   },
 };

@@ -4,6 +4,7 @@ from .models import *
 class StudentProfileSerializer(
     serializers.ModelSerializer
 ):
+    id = serializers.ReadOnlyField(source='user.id')
     username = serializers.ReadOnlyField(source='user.username')
     email = serializers.ReadOnlyField(source='user.email')
 
@@ -11,6 +12,7 @@ class StudentProfileSerializer(
         model = StudentProfile
 
         fields = [
+            "id",
             "username",
             "email",
             "bio",
@@ -21,6 +23,7 @@ class StudentProfileSerializer(
 class MentorProfileSerializer(
     serializers.ModelSerializer
 ):
+    id = serializers.ReadOnlyField(source='user.id')
     username = serializers.ReadOnlyField(source='user.username')
     email = serializers.ReadOnlyField(source='user.email')
 
@@ -28,6 +31,7 @@ class MentorProfileSerializer(
         model = MentorProfile
 
         fields = [
+            "id",
             "username",
             "email",
             "specialization",

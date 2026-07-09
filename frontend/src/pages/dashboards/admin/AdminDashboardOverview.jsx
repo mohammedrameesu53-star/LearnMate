@@ -54,7 +54,7 @@ export default function AdminDashboardOverview() {
           <div>
             <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Platform Health</h2>
             <p className="text-slate-500 font-medium text-sm mt-1">
-              Real-time overview of EduNexus performance and growth.
+              Real-time overview of LearnMate performance and growth.
             </p>
           </div>
 

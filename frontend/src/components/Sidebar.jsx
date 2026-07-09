@@ -2,7 +2,8 @@ import React from "react";
 import { roleConfig } from "../config/roleConfig";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { HelpCircle, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+
 
 export default function Sidebar({ role }) {
   const navigate = useNavigate();
@@ -21,10 +22,10 @@ export default function Sidebar({ role }) {
       <div className="px-6 py-5 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-indigo-200">
-            E
+            L
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-800 tracking-tight leading-none">EduNexus AI</h1>
+            <h1 className="text-base font-bold text-slate-800 tracking-tight leading-none">LearnMate AI</h1>
             <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
               Future of Learning
             </span>
@@ -52,30 +53,10 @@ export default function Sidebar({ role }) {
         })}
       </nav>
 
-      {/* Pro Upgrade Banner */}
-      {config.upgrade && role !== 'admin' && (
-        <div className="px-4 py-4 mx-4 mb-4 bg-gradient-to-tr from-indigo-50 to-indigo-100/50 border border-indigo-100 rounded-2xl relative overflow-hidden">
-          <div className="relative z-10">
-            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block mb-1">
-              Pro Access
-            </span>
-            <p className="text-xs text-slate-600 mb-3 font-medium leading-normal">
-              Unlock advanced AI diagnostics and mock exams.
-            </p>
-            <button className="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-100 transition duration-200 cursor-pointer">
-              Upgrade to Pro
-            </button>
-          </div>
-          <div className="absolute right-[-20px] bottom-[-20px] w-20 h-20 bg-indigo-200/30 rounded-full blur-xl"></div>
-        </div>
-      )}
 
       {/* Sidebar Footer */}
       <div className="px-4 py-4 border-t border-gray-100 bg-slate-50/50 space-y-1">
-        <button className="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer text-left">
-          <HelpCircle size={16} className="text-slate-400" />
-          <span>Help Center</span>
-        </button>
+
         <button 
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition cursor-pointer text-left"
