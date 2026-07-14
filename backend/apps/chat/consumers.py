@@ -3,7 +3,7 @@ from django.http import response
 from channels.db import database_sync_to_async
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Message,ChatRoom
+from .models import Message,ChatRoom,GroupChat,GroupMember,GroupMessage
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -91,13 +91,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             id=self.room_id
         )
 
-        if sender == room.student:
+        if sender == room.user1:
 
-            receiver = room.mentor
+            receiver = room.user2
 
-        elif sender == room.mentor:
+        elif sender == room.user2:
 
-            receiver = room.student
+            receiver = room.user1
 
         else:
 
@@ -142,7 +142,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         user = self.scope["user"]
 
-        return user == room.student or user == room.mentor            
+        return user == room.user1 or user == room.user2            
 
 
     async def chat_message(self, event):
@@ -212,6 +212,123 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print(f"Disconnected: {close_code}")
 
 
+class GroupConsumer(AsyncWebsocketConsumer):
 
+    print("GroupConsumer file imported")
+
+    async def connect(self):
+
+        self.group_id = self.scope["url_route"]["kwargs"]["group_id"]
+
+        self.group_name = f"group_{self.group_id}"
+
+        if not await self.is_group_member():
+
+            print("Unauthorized User")
+            print("this is the place where i printed Unautherized User")
+
+            await self.close()
+
+            return
+
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+        print(f"Joined {self.group_name}")    
+
+    @database_sync_to_async
+    def is_group_member(self):
+
+        user = self.scope["user"]
+
+        try:
+
+            group = GroupChat.objects.get(
+                id=self.group_id
+            )
+            print(group)
+        except GroupChat.DoesNotExist:
+            
+            return False
+
+        if user == group.created_by:
+
+            return True
+
+        return GroupMember.objects.filter(
+            group=group,
+            user=user
+        ).exists()
+
+
+    async def receive(self, text_data):
+
+        data = json.loads(text_data)
+
+        message = data.get("message")
+
+        print(f"Received: {message}")
+
+        message_data = await self.save_group_message(
+            self.scope["user"],
+            message
+        )
+
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "group_message",
+                "message_data": message_data,
+            }
+        )
+
+        print("Message Broadcasted")    
         
- 
+
+    @database_sync_to_async
+    def save_group_message(self, sender, message):
+
+        group = GroupChat.objects.get(
+            id=self.group_id
+        )
+
+        message_obj = GroupMessage.objects.create(
+            group=group,
+            sender=sender,
+            message=message
+        )
+
+        print("Group message saved.")
+
+        return {
+            "id": message_obj.id,
+            "group_id": group.id,
+            "message": message_obj.message,
+            "sender": {
+                "id": str(sender.id),
+                "email": sender.email,
+                "role": sender.role,
+            },
+            "created_at": message_obj.created_at.isoformat(),
+        }  
+
+    async def group_message(self, event):
+
+        message_data = event["message_data"]
+
+        print(f"Broadcast: {message_data}")
+
+        await self.send(
+            text_data=json.dumps({
+                "message_data": message_data
+            })
+        )    
+
+
+
+    async def disconnect(self, close_code):
+        pass

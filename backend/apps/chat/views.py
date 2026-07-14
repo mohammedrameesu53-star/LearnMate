@@ -1,12 +1,16 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
+
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+from rest_framework import status
+from django.db.models import Q
 
-from .models import ChatRoom, Message
-from .serializers import MessageSerializer, ChatRoomSerializer
+
+from .models import ChatRoom, Message,GroupChat,GroupMessage
+from .serializers import MessageSerializer,ChatRoomSerializer,GroupChatSerializer,GroupMessageSerializer
 
 
 class ChatHistoryView(APIView):
@@ -15,9 +19,9 @@ class ChatHistoryView(APIView):
 
     def get(self, request, room_id):
 
-        room = get_object_or_404(ChatRoom, id=room_id)
+        room = ChatRoom.objects.get(id=room_id)
 
-        if request.user not in [room.student, room.mentor]:
+        if request.user not in [room.user1, room.user2]:
             raise PermissionDenied(
                 "You are not allowed to access this chat."
             )
@@ -41,12 +45,11 @@ class ChatRoomListView(APIView):
     def get(self, request):
 
         rooms = ChatRoom.objects.filter(
-            student=request.user
-        ) | ChatRoom.objects.filter(
-            mentor=request.user
-        )
 
-        rooms = rooms.order_by("-updated_at")
+                Q(user1=request.user) |
+                Q(user2=request.user)
+
+            ).order_by("-updated_at")
 
         serializer = ChatRoomSerializer(
             rooms,
@@ -54,7 +57,7 @@ class ChatRoomListView(APIView):
         )
 
         return Response(serializer.data)
-
+        
 
 class MarkMessagesReadView(APIView):
 
@@ -62,10 +65,13 @@ class MarkMessagesReadView(APIView):
 
     def patch(self, request, room_id):
 
-        room = get_object_or_404(ChatRoom, id=room_id)
+        room = ChatRoom.objects.get(id=room_id)
 
-        if request.user not in [room.student, room.mentor]:
-            raise PermissionDenied("You are not allowed to access this chat.")
+        if request.user not in [room.user1, room.user2]:
+            return Response(
+                {"detail": "Permission denied."},
+                status=403
+            )
 
         updated = Message.objects.filter(
             room=room,
@@ -77,5 +83,113 @@ class MarkMessagesReadView(APIView):
             "messages_marked_read": updated
         })
 
+        
+class GroupChatListView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        user = request.user
+
+        if user.role == "mentor":
+            groups = GroupChat.objects.filter(
+                created_by=user
+            )
+        else:
+            groups = GroupChat.objects.filter(
+                members__user=user
+            ).distinct()
+
+        serializer = GroupChatSerializer(
+            groups,
+            many=True
+        )
+
+        return Response(serializer.data)
 
 
+
+class GroupMessageListView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, group_id):
+
+        user = request.user
+
+        try:
+
+            group = GroupChat.objects.get(
+                id=group_id
+            )
+
+        except GroupChat.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Group not found."
+                },
+                status=404
+            )
+
+        if (
+            user != group.created_by and
+            not group.members.filter(user=user).exists()
+        ):
+
+            return Response(
+                {
+                    "error": "You are not a member of this group."
+                },
+                status=403
+            )
+
+        messages = GroupMessage.objects.filter(
+            group=group
+        ).order_by("created_at")
+
+        serializer = GroupMessageSerializer(
+            messages,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+
+class CreateGroupView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        user = request.user
+
+        if user.role != "mentor":
+
+            return Response(
+                {
+                    "error": "Only mentors can create groups."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = GroupChatSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            serializer.save(
+                created_by=user
+            )
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )        

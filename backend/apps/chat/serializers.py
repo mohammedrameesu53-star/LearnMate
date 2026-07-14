@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Message,ChatRoom
+from .models import Message,ChatRoom,GroupMember,GroupMessage,GroupChat
  
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -22,32 +22,32 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ChatRoomSerializer(serializers.ModelSerializer):
 
-    student = serializers.SerializerMethodField()
-    mentor = serializers.SerializerMethodField()
+    user1 = serializers.SerializerMethodField()
+    user2 = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
         fields = [
             "id",
-            "student",
-            "mentor",
+            "user1",
+            "user2",
             "last_message",
             "updated_at",
         ]
 
-    def get_student(self, obj):
+    def get_user1(self, obj):
         return {
-            "id": str(obj.student.id),
-            "email": obj.student.email,
-            "role": obj.student.role,
+            "id": str(obj.user1.id),
+            "email": obj.user1.email,
+            "role": obj.user1.role,
         }
 
-    def get_mentor(self, obj):
+    def get_user2(self, obj):
         return {
-            "id": str(obj.mentor.id),
-            "email": obj.mentor.email,
-            "role": obj.mentor.role,
+            "id": str(obj.user2.id),
+            "email": obj.user2.email,
+            "role": obj.user2.role,
         }
 
     def get_last_message(self, obj):
@@ -58,3 +58,51 @@ class ChatRoomSerializer(serializers.ModelSerializer):
             return last_message.message
 
         return None
+
+
+class GroupMemberSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GroupMember
+        fields = [
+            "id",
+            "user",
+            "joined_at",
+        ]
+
+    def get_user(self, obj):
+        return {
+            "id": str(obj.user.id),
+            "email": obj.user.email,
+            "role": obj.user.role,
+        }
+
+
+class GroupMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GroupMessage
+        fields = [
+            "id",
+            "group",
+            "sender",
+            "message",
+            "created_at",
+        ]
+
+    def get_sender(self, obj):
+        return {
+            "id": str(obj.sender.id),
+            "email": obj.sender.email,
+            "role": obj.sender.role,
+        }
+
+
+class GroupChatSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GroupChat
+        fields = "__all__"  
+        read_only_fields = ["created_by"]      

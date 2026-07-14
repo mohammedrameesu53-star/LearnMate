@@ -1,10 +1,11 @@
+
 from django.contrib import admin
-from .models import ChatRoom, Message
+from .models import ChatRoom, Message,GroupChat,GroupMember,GroupMessage
+# # Register your models here.
 
-@admin.register(ChatRoom)
-class ChatRoomAdmin(admin.ModelAdmin):
-    list_display = ('student', 'mentor', 'created_at', 'updated_at')
 
-@admin.register(Message)
-class MessageAdmin(admin.ModelAdmin):
-    list_display = ('room', 'sender', 'receiver', 'message', 'is_read', 'created_at')
+admin.site.register(ChatRoom)
+admin.site.register(Message)
+admin.site.register(GroupChat)
+admin.site.register(GroupMember)
+admin.site.register(GroupMessage)

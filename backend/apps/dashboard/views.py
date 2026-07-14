@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.accounts.permissions import IsAdmin, IsMentor, IsStudent
 from apps.accounts.models import User
 from .models import Course, CourseEnrollment, StudentActivity, StudentStreak, Resource, Message, AIChatMessage
-from apps.dashboard.serializers import RecentUserSerializer
+from .serializers import RecentUserSerializer
 
 class StudentDashboardView(APIView):
     permission_classes = [IsStudent]
