@@ -332,3 +332,43 @@ class GroupConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         pass
+
+
+class BroadcastConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+        user = self.scope.get("user")
+        if not user or user.is_anonymous:
+            print("Unauthorized connection attempt to Broadcast WS.")
+            await self.close()
+            return
+
+        self.group_name = "broadcasts"
+
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+        print("Broadcast WebSocket connected")
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(
+                self.group_name,
+                self.channel_name
+            )
+        print(f"Broadcast WebSocket disconnected: {close_code}")
+
+    async def receive(self, text_data):
+        pass
+
+    async def broadcast_message(self, event):
+        broadcast_data = event["broadcast"]
+        await self.send(
+            text_data=json.dumps({
+                "type": "broadcast",
+                "broadcast": broadcast_data
+            })
+        )

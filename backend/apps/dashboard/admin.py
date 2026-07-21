@@ -1,30 +1,30 @@
 from django.contrib import admin
-from .models import Course, CourseEnrollment, StudentActivity, StudentStreak, Resource, Message, AIChatMessage
+from .models import Course, CourseEnrollment,Subject,Chapter,Lesson,LessonProgress
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'code', 'difficulty', 'lessons_count')
+    list_display = ('subject', 'title', 'code', 'difficulty', 'lessons_count')
 
+@admin.register(Chapter)
+class ChapterAdmin(admin.ModelAdmin):
+    list_display = ('course', 'title', 'order')
+
+@admin.register(Lesson)
+class LessonAdmin(admin.ModelAdmin):
+    list_display = ('chapter', 'title', 'order')
+
+@admin.register(LessonProgress)
+class LessonProgressAdmin(admin.ModelAdmin):
+    list_display = ('student', 'lesson', 'is_completed','completed_at')
+    
+    
 @admin.register(CourseEnrollment)
 class CourseEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'progress', 'is_active')
 
-@admin.register(StudentActivity)
-class StudentActivityAdmin(admin.ModelAdmin):
-    list_display = ('student', 'activity_name', 'category', 'status', 'timestamp', 'score')
 
-@admin.register(StudentStreak)
-class StudentStreakAdmin(admin.ModelAdmin):
-    list_display = ('student', 'days')
 
-@admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'size', 'file_type', 'course')
-
-@admin.register(Message)
-class MessageAdmin(admin.ModelAdmin):
-    list_display = ('sender', 'receiver_name', 'text', 'timestamp', 'is_read')
-
-@admin.register(AIChatMessage)
-class AIChatMessageAdmin(admin.ModelAdmin):
-    list_display = ('student', 'sender', 'text', 'timestamp')

@@ -1,15 +1,68 @@
 from django.db import models
+# pyrefly: ignore [missing-import]
 from apps.accounts.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
-class Course(models.Model):
-    title = models.CharField(max_length=255)
+class Subject(models.Model):
+    """High-level category classification (e.g., Physics, Chemistry, Biology, Mathematics)"""
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    code = models.CharField(max_length=50, unique=True)
-    difficulty = models.CharField(max_length=50, default="Beginner")
-    lessons_count = models.IntegerField(default=1)
 
     def __str__(self):
-        return self.title
+        return self.name
+
+class Course(models.Model):
+    """Specific course mapped directly under an educational Subject field"""
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='courses', null=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    code = models.CharField(max_length=50, unique=True) # e.g., 'PHY-301'
+    difficulty = models.CharField(max_length=50, default="Beginner")
+    lessons_count = models.IntegerField(default=0) # Automatically updated dynamically
+
+    def __str__(self):
+        return f"[{self.code}] {self.title}"
+
+
+class Chapter(models.Model):
+    """Sequential operational modules inside a parent Course container"""
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='chapters')
+    title = models.CharField(max_length=255)
+    order = models.IntegerField(default=1) # Controls order of chapters (1, 2, 3...)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.course.code} - Ch.{self.order}: {self.title}"
+
+class Lesson(models.Model):
+    """The bite-sized material resource lines (lectures, video URLs, markdown pages)"""
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=255)
+    content_text = models.TextField(blank=True)
+    order = models.IntegerField(default=1) # Controls order inside the chapter
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Ch.{self.chapter.order} Lesson {self.order}: {self.title}"
+
+class LessonProgress(models.Model):
+    """The progress bridge logging exact time stamps when a student completes a lesson"""
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lesson_progress_logs')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='completed_by_students')
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'lesson')
+
+    def __str__(self):
+        return f"{self.student.email} completed {self.lesson.title}"
+
 
 class CourseEnrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="enrollments")
@@ -23,49 +76,3 @@ class CourseEnrollment(models.Model):
     def __str__(self):
         return f"{self.student.email} - {self.course.title} ({self.progress}%)"
 
-class StudentActivity(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="activities")
-    activity_name = models.CharField(max_length=255)
-    category = models.CharField(max_length=100)  # Assignment, Lesson, Quiz
-    status = models.CharField(max_length=50)     # COMPLETED, PENDING
-    timestamp = models.CharField(max_length=100) # e.g. "2 hours ago", "Yesterday"
-    score = models.CharField(max_length=50, default="-")
-
-    def __str__(self):
-        return f"{self.student.email} - {self.activity_name}"
-
-class StudentStreak(models.Model):
-    student = models.OneToOneField(User, on_delete=models.CASCADE, related_name="streak")
-    days = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.student.email} - {self.days} Days"
-
-class Resource(models.Model):
-    name = models.CharField(max_length=255)
-    size = models.CharField(max_length=50)
-    file_type = models.CharField(max_length=100)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return self.name
-
-class Message(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
-    receiver_name = models.CharField(max_length=255)
-    text = models.TextField()
-    timestamp = models.CharField(max_length=100)
-    is_read = models.BooleanField(default=False)
-    initials = models.CharField(max_length=10, default="JV")
-
-    def __str__(self):
-        return f"To {self.receiver_name}: {self.text[:30]}"
-
-class AIChatMessage(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ai_chat_messages")
-    sender = models.CharField(max_length=10)
-    text = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.sender}: {self.text[:30]}"

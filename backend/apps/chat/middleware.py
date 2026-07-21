@@ -1,7 +1,13 @@
+# pyrefly: ignore [missing-import]
 from channels.middleware import BaseMiddleware
+# pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.tokens import AccessToken
+# pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.exceptions import TokenError
+# pyrefly: ignore [missing-import]
 from apps.accounts.models import User
+
+
 from channels.db import database_sync_to_async
 
 class JWTAuthMiddleware(BaseMiddleware):
@@ -32,9 +38,9 @@ class JWTAuthMiddleware(BaseMiddleware):
 
             print("Authenticated User:", user.email)
 
-        except TokenError:
-
+        except Exception as e:
             print("Invalid Token")
+            print(e)
 
         
 

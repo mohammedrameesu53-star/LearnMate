@@ -1,11 +1,55 @@
 from django.shortcuts import render
+# pyrefly: ignore [missing-import]
 from rest_framework.views import APIView
+# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
+# pyrefly: ignore [missing-import] 
 from rest_framework.permissions import IsAuthenticated
+# pyrefly: ignore
 from apps.accounts.permissions import IsAdmin, IsMentor, IsStudent
+# pyrefly: ignore
 from apps.accounts.models import User
-from .models import Course, CourseEnrollment, StudentActivity, StudentStreak, Resource, Message, AIChatMessage
-from .serializers import RecentUserSerializer
+from .models import Course, LessonProgress, Lesson , CourseEnrollment
+from .serializers import RecentUserSerializer ,CourseDetailSerializer
+# pyrefly: ignore
+from rest_framework import status
+
+class CourseDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+        """Returns the full chapter and lesson tree for a specific course"""
+        try:
+            course = Course.objects.get(id=course_id)
+            serializer = CourseDetailSerializer(course)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Course.DoesNotExist:
+            return Response({"message": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CompleteLessonView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, lesson_id):
+        """Marks a specific lesson as completed by the authenticated student"""
+        try:
+            lesson = Lesson.objects.get(id=lesson_id)
+            progress, created = LessonProgress.objects.get_or_create(
+                student=request.user,
+                lesson=lesson
+            )
+            progress.is_completed = True
+            progress.save()
+            
+            # TODO: Here you can check if the overall course progress hit 100%.
+            # If yes, trigger your immediate Celery task:
+            # send_course_completion_email.delay(request.user.id, lesson.chapter.course.id)
+
+            return Response({"message": "Lesson marked as completed successfully"}, status=status.HTTP_200_OK)
+        except Lesson.DoesNotExist:
+            return Response({"message": "Lesson not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 class StudentDashboardView(APIView):
     permission_classes = [IsStudent]
@@ -13,8 +57,6 @@ class StudentDashboardView(APIView):
     def get(self, request):
         user = request.user
         
-        # 1. Get or Create Streak
-        streak, _ = StudentStreak.objects.get_or_create(student=user, defaults={"days": 5})
 
         # 2. Get or Create Enrolled Courses (with auto-seeding if empty)
         enrollments = CourseEnrollment.objects.filter(student=user, is_active=True)
@@ -55,35 +97,6 @@ class StudentDashboardView(APIView):
             
             enrollments = CourseEnrollment.objects.filter(student=user, is_active=True)
 
-        # 3. Get or Create Student Activities
-        activities = StudentActivity.objects.filter(student=user)
-        if not activities.exists():
-            StudentActivity.objects.create(
-                student=user,
-                activity_name="Lorentz Factor Problem Set",
-                category="Assignment",
-                status="COMPLETED",
-                timestamp="2 hours ago",
-                score="98%"
-            )
-            StudentActivity.objects.create(
-                student=user,
-                activity_name="Time Dilation Basics (Video)",
-                category="Lesson",
-                status="COMPLETED",
-                timestamp="Yesterday",
-                score="-"
-            )
-            StudentActivity.objects.create(
-                student=user,
-                activity_name="Weekly Physics Check-in",
-                category="Quiz",
-                status="PENDING",
-                timestamp="3 days ago",
-                score="82%"
-            )
-            activities = StudentActivity.objects.filter(student=user)
-
         # 4. Get Recommendations (courses user is not enrolled in)
         enrolled_course_ids = enrollments.values_list('course_id', flat=True)
         recommendations = Course.objects.exclude(id__in=enrolled_course_ids)
@@ -110,38 +123,6 @@ class StudentDashboardView(APIView):
             )
             recommendations = Course.objects.exclude(id__in=enrolled_course_ids)
 
-        # 5. Get or Create Resources
-        resources = Resource.objects.all()
-        if not resources.exists():
-            Resource.objects.create(name="Special Relativity Formula Sheet", size="2.4 MB", file_type="PDF Document")
-            Resource.objects.create(name="Lorentz Factor Problem Guide", size="8.1 MB", file_type="PDF Workbook")
-            Resource.objects.create(name="Quantum Mechanics Core Lectures", size="15.3 MB", file_type="Presentation Slides")
-            Resource.objects.create(name="Physics II Lab Manual", size="4.7 MB", file_type="PDF Document")
-            resources = Resource.objects.all()
-
-        # 6. Get or Create Messages
-        msgs = Message.objects.filter(sender=user)
-        if not msgs.exists():
-            Message.objects.create(
-                sender=user,
-                receiver_name="Dr. Sarah Chen",
-                text=f"Hi {user.username}, I reviewed your last problem set and noticed you got 98%. Excellent job on that hard Lorentz relativity transformations question!",
-                timestamp="12:45",
-                is_read=True,
-                initials="SC"
-            )
-            msgs = Message.objects.filter(sender=user)
-
-        # 7. Get or Create AI Chat messages
-        ai_msgs = AIChatMessage.objects.filter(student=user).order_by('timestamp')
-        if not ai_msgs.exists():
-            AIChatMessage.objects.create(
-                student=user,
-                sender="ai",
-                text=f"Hello {user.username}! I am your AI Tutor. Ready to master Einstein's Relativity today? Ask me any questions!"
-            )
-            ai_msgs = AIChatMessage.objects.filter(student=user).order_by('timestamp')
-
         # 8. Format current course (e.g. PHY-301)
         current_enrollment = enrollments.filter(course__code="PHY-301").first()
         if not current_enrollment:
@@ -158,7 +139,6 @@ class StudentDashboardView(APIView):
 
         # 9. Format Response
         return Response({
-            "streak": streak.days,
             "current_course": current_course_data,
             "enrolled_courses": [
                 {
@@ -170,15 +150,6 @@ class StudentDashboardView(APIView):
                     "progress": e.progress
                 } for e in enrollments
             ],
-            "recent_activity": [
-                {
-                    "activity_name": a.activity_name,
-                    "category": a.category,
-                    "status": a.status,
-                    "timestamp": a.timestamp,
-                    "score": a.score
-                } for a in activities
-            ],
             "recommendations": [
                 {
                     "title": r.title,
@@ -188,141 +159,8 @@ class StudentDashboardView(APIView):
                     "lessons_count": r.lessons_count
                 } for r in recommendations
             ],
-            "resources": [
-                {
-                    "name": res.name,
-                    "size": res.size,
-                    "file_type": res.file_type
-                } for res in resources
-            ],
-            "messages": [
-                {
-                    "receiver_name": m.receiver_name,
-                    "text": m.text,
-                    "timestamp": m.timestamp,
-                    "is_read": m.is_read,
-                    "initials": m.initials
-                } for m in msgs
-            ],
-            "ai_chat_messages": [
-                {
-                    "sender": m.sender,
-                    "text": m.text
-                } for m in ai_msgs
-            ]
         })
 
-class StudentAIChatView(APIView):
-    permission_classes = [IsStudent]
-
-    def get(self, request):
-        user = request.user
-        messages = AIChatMessage.objects.filter(student=user).order_by('timestamp')
-        if not messages.exists():
-            AIChatMessage.objects.create(
-                student=user,
-                sender="ai",
-                text=f"Hello {user.username}! I am your AI Tutor. Ready to master Einstein's Relativity today? Ask me any questions!"
-            )
-            messages = AIChatMessage.objects.filter(student=user).order_by('timestamp')
-            
-        return Response([
-            {
-                "sender": m.sender,
-                "text": m.text
-            } for m in messages
-        ])
-
-    def post(self, request):
-        user = request.user
-        text = request.data.get("text", "")
-        if not text:
-            return Response({"error": "Text is required"}, status=400)
-            
-        # Save user message
-        AIChatMessage.objects.create(
-            student=user,
-            sender="user",
-            text=text
-        )
-        
-        # Generate simulated response
-        ai_response = "That is a fascinating question! Let's break it down using the Lorentz factor equation γ = 1 / sqrt(1 - v²/c²)..."
-        if "mass" in text.lower():
-            ai_response = "In special relativity, mass and energy are equivalent, expressed by Einstein's famous equation E = mc²."
-        elif "time" in text.lower():
-            ai_response = "Time dilation means that a clock moving relative to an observer will be measured to tick slower than a clock at rest in the observer's own frame of reference."
-        elif "streak" in text.lower():
-            ai_response = "Keep studying physics every day to maintain your learning streak!"
-            
-        # Save AI response
-        AIChatMessage.objects.create(
-            student=user,
-            sender="ai",
-            text=ai_response
-        )
-        
-        # Get all messages
-        messages = AIChatMessage.objects.filter(student=user).order_by('timestamp')
-        return Response([
-            {
-                "sender": m.sender,
-                "text": m.text
-            } for m in messages
-        ])
-
-class StudentMessagesView(APIView):
-    permission_classes = [IsStudent]
-
-    def get(self, request):
-        user = request.user
-        messages = Message.objects.filter(sender=user)
-        if not messages.exists():
-            Message.objects.create(
-                sender=user,
-                receiver_name="Dr. Sarah Chen",
-                text=f"Hi {user.username}, I reviewed your last problem set and noticed you got 98%. Excellent job on that hard Lorentz relativity transformations question!",
-                timestamp="12:45",
-                is_read=True,
-                initials="SC"
-            )
-            messages = Message.objects.filter(sender=user)
-            
-        return Response([
-            {
-                "receiver_name": m.receiver_name,
-                "text": m.text,
-                "timestamp": m.timestamp,
-                "is_read": m.is_read,
-                "initials": m.initials
-            } for m in messages
-        ])
-
-    def post(self, request):
-        user = request.user
-        text = request.data.get("text", "")
-        receiver_name = request.data.get("receiver_name", "Dr. Sarah Chen")
-        initials = request.data.get("initials", "SC")
-        
-        if not text:
-            return Response({"error": "Text is required"}, status=400)
-            
-        msg = Message.objects.create(
-            sender=user,
-            receiver_name=receiver_name,
-            text=text,
-            timestamp="Just now",
-            is_read=True,
-            initials=initials
-        )
-        
-        return Response({
-            "receiver_name": msg.receiver_name,
-            "text": msg.text,
-            "timestamp": msg.timestamp,
-            "is_read": msg.is_read,
-            "initials": msg.initials
-        })
 
 class MentorDashboardView(APIView):
     permission_classes = [IsMentor]

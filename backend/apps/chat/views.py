@@ -1,10 +1,15 @@
 from django.shortcuts import render
 
 # Create your views here.
+# pyrefly: ignore [missing-import]
 from rest_framework.views import APIView
+# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
+# pyrefly: ignore [missing-import]
 from rest_framework.permissions import IsAuthenticated
+# pyrefly: ignore [missing-import]
 from rest_framework.exceptions import PermissionDenied
+# pyrefly: ignore [missing-import]
 from rest_framework import status
 from django.db.models import Q
 
@@ -92,19 +97,27 @@ class GroupChatListView(APIView):
 
         user = request.user
 
-        if user.role == "mentor":
+        if user.role == "admin":
+
             groups = GroupChat.objects.filter(
-                created_by=user
-            )
-        else:
+                Q(created_by=user) |
+                Q(members__user=user)
+            ).distinct()
+
+        elif user.role == "mentor":
+
+            groups = GroupChat.objects.filter(
+                Q(created_by=user) |
+                Q(members__user=user)
+            ).distinct()
+
+        else:   # student
+
             groups = GroupChat.objects.filter(
                 members__user=user
             ).distinct()
 
-        serializer = GroupChatSerializer(
-            groups,
-            many=True
-        )
+        serializer = GroupChatSerializer(groups, many=True)
 
         return Response(serializer.data)
 
