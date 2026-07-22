@@ -34,13 +34,8 @@ export default function StudentAITutor() {
     const input = chatInput;
     setChatInput("");
     setChatMessages(prev => [...prev, { sender: "user", text: input }]);
+    console.log("AI Chat will be implemented later.");
 
-    try {
-      const response = await api.post("/api/dashboard/student/ai-chat/", { text: input });
-      setChatMessages(response.data);
-    } catch (err) {
-      console.error("Error sending AI chat:", err);
-    }
   };
 
   if (isLoading) {

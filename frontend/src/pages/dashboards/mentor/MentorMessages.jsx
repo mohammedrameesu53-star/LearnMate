@@ -8,8 +8,20 @@ export default function MentorMessages() {
 
   return (
     <DashboardLayout role="mentor" user={user}>
-      <ChatComponent />
+      <div className="space-y-4 h-full flex flex-col">
+        {/* Page Header */}
+        <div>
+          <h2 className="text-xl font-extrabold text-slate-800">Messages & Cohorts</h2>
+          <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            Manage Direct Conversations & Cohort Chats
+          </p>
+        </div>
+
+        {/* Content Pane containing unified Chat Workspace */}
+        <div className="flex-1 min-h-0">
+          <ChatComponent />
+        </div>
+      </div>
     </DashboardLayout>
   );
 }
-
