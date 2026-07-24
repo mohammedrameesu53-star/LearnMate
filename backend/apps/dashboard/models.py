@@ -65,7 +65,7 @@ class LessonProgress(models.Model):
 
 
 class CourseEnrollment(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="enrollments")
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="course_enrollments")
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     progress = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)

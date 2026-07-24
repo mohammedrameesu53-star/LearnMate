@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/dashboard/',include('apps.dashboard.urls')),
     path('api/profile/',include('apps.profiles.urls')),
     path('api/chat/',include('apps.chat.urls')),
+    path('api/courses/',include('apps.courses.urls'))
 ]
