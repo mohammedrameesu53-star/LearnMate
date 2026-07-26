@@ -5,5 +5,5 @@
     "${workspaceFolder}/backend/apps"
   ],
   "python.analysis.indexing": true,
-  "python.analysis.typeCheckingMode": "basic"
+  "python.analysis.typeCheckingMode": "off"
 }

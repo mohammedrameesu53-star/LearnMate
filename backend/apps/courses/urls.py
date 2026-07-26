@@ -1,6 +1,6 @@
 # pyrefly: ignore [missing-import]
 from django.urls import path
-from .views import CreateCourseView,MyCoursesView,CourseDetailView,UpdateCourseView,DeleteCourseView,CreateModuleView,ModuleListView,UpdateModuleView,DeleteModuleView,CreateLessonView,LessonListView,UpdateLessonView,DeleteLessonView,LessonResourceView,LessonResourceDetailView,PublishCourseAPIView,UnpublishCourseAPIView,PublishedCourseListView,StudentCourseDetailsAPIView,EnrollmentAPIView,MyCoursesAPIView,ModuleListAPIView,LessonListAPIView,LessonDetailsAPIView,MarkLessonCompleteAPIView,CourseProgressAPIView,ContinueLearningAPIView,CourseCompletionAPIView
+from .views import CreateCourseView,MyCoursesView,CourseDetailView,UpdateCourseView,DeleteCourseView,CreateModuleView,ModuleListView,UpdateModuleView,DeleteModuleView,CreateLessonView,LessonListView,UpdateLessonView,DeleteLessonView,LessonResourceView,LessonResourceDetailView,PublishCourseAPIView,UnpublishCourseAPIView,PublishedCourseListView,StudentCourseDetailsAPIView,EnrollmentAPIView,MyCoursesAPIView,ModuleListAPIView,LessonListAPIView,LessonDetailsAPIView,MarkLessonCompleteAPIView,CourseProgressAPIView,ContinueLearningAPIView,CourseCompletionAPIView,MentorDashboardAPIView,CourseStudentsAPIView,StudentProgressDetailAPIView,CourseStatisticsAPIView,AdminCourseAnalyticsAPIView
 
 urlpatterns=[
     # Mentor Course CRUD.
@@ -166,6 +166,37 @@ path(
     "student/courses/<int:course_id>/complete/",
     CourseCompletionAPIView.as_view(),
     name="course-completion",
+),
+
+
+
+
+
+
+path(
+    "mentor/dashboard/",
+    MentorDashboardAPIView.as_view(),
+    name="mentor-dashboard",
+),
+path(
+    "mentor/courses/<int:course_id>/students/",
+    CourseStudentsAPIView.as_view(),
+    name="mentor-course-students",
+),
+path(
+    "mentor/courses/<int:course_id>/students/<uuid:student_id>/",
+    StudentProgressDetailAPIView.as_view(),
+    name="student-progress-detail",
+),
+path(
+    "mentor/courses/<int:course_id>/statistics/",
+    CourseStatisticsAPIView.as_view(),
+    name="course-statistics",
+),
+path(
+    "admin/dashboard/",
+    AdminCourseAnalyticsAPIView.as_view(),
+    name="admin-course-dashboard",
 ),
 
 ]

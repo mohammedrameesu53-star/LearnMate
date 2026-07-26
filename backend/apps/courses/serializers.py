@@ -71,6 +71,97 @@ class LessonProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = LessonProgress
         fields = "__all__"
+
+
+class CourseStudentSerializer(serializers.ModelSerializer):
+
+    student_id = serializers.UUIDField(
+        source="student.id",
+        read_only=True
+    )
+
+    student_name = serializers.SerializerMethodField()
+
+    email = serializers.EmailField(
+        source="student.email",
+        read_only=True
+    )
+
+    progress = serializers.SerializerMethodField()
+
+    completed = serializers.SerializerMethodField()
+
+    class Meta:
+
+        model = Enrollment
+
+        fields = [
+            "student_id",
+            "student_name",
+            "email",
+            "enrolled_at",
+            "progress",
+            "completed",
+        ]
+
+    def get_student_name(self, obj):
+
+        return (
+            obj.student.get_full_name()
+            or obj.student.username
+            or obj.student.email
+        )
+
+    def get_progress(self, obj):
+
+        total_lessons = Lesson.objects.filter(
+            module__course=obj.course
+        ).count()
+
+        completed_lessons = LessonProgress.objects.filter(
+            student=obj.student,
+            lesson__module__course=obj.course,
+            is_completed=True
+        ).count()
+
+        if total_lessons == 0:
+            return 0
+
+        return round(
+            (completed_lessons / total_lessons) * 100,
+            2
+        )
+
+    def get_completed(self, obj):
+
+        return self.get_progress(obj) == 100
+
+
+
+class CompletedLessonSerializer(serializers.ModelSerializer):
+
+    completed_at = serializers.DateTimeField(read_only=True)
+
+    lesson_id = serializers.IntegerField(
+        source="lesson.id",
+        read_only=True
+    )
+
+    lesson_title = serializers.CharField(
+        source="lesson.title",
+        read_only=True
+    )
+
+    class Meta:
+
+        model = LessonProgress
+
+        fields = [
+            "lesson_id",
+            "lesson_title",
+            "completed_at",
+        ]
+
         
-                                
+
 

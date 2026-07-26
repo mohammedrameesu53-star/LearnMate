@@ -13,9 +13,18 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
+from django.db.models import Count
+# pyrefly: ignore [missing-import]
+from apps.accounts.models import User
+# pyrefly: ignore [missing-import]
+from apps.accounts.permissions import (
+    IsAdmin,
+    IsMentor,
+    IsStudent
+)
+from .tasks import send_course_completion_email
 from .models import Course,Module,Lesson,LessonResource,Enrollment,LessonProgress
-from .serializers import CourseSerializer,ModuleSerializer,LessonSerializer,LessonResourceSerializer,EnrollmentSerializer
+from .serializers import CourseSerializer,ModuleSerializer,LessonSerializer,LessonResourceSerializer,EnrollmentSerializer,CourseStudentSerializer,CompletedLessonSerializer
 
 # Mentor Course CRUD.
 # *************************************************
@@ -1494,9 +1503,465 @@ class CourseCompletionAPIView(APIView):
         enrollment.completed_at = timezone.now()
         enrollment.save()
 
+        # Run the email task in the background
+        send_course_completion_email.delay(
+            request.user.id,
+            course.id
+)
+
+
         return Response(
             {
                 "message": "Congratulations! Course completed successfully.",
                 "completed_at": enrollment.completed_at,
             }
         )        
+
+
+
+class MentorDashboardAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        if request.user.role != "mentor":
+
+            return Response(
+                {
+                    "error": "Only mentors can access this endpoint."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        mentor_courses = Course.objects.filter(
+            mentor=request.user
+        ).order_by("-created_at")
+
+        total_courses = mentor_courses.count()
+
+        published_courses = mentor_courses.filter(
+            status="published"
+        ).count()
+
+        draft_courses = mentor_courses.filter(
+            status="draft"
+        ).count()
+
+        total_students = Enrollment.objects.filter(
+            course__mentor=request.user,
+            is_active=True
+        ).count()
+
+        completed_students = Enrollment.objects.filter(
+            course__mentor=request.user,
+            is_completed=True
+        ).count()
+
+        courses = []
+
+        for course in mentor_courses:
+
+            students = Enrollment.objects.filter(
+                course=course,
+                is_active=True
+            ).count()
+
+            completed = Enrollment.objects.filter(
+                course=course,
+                is_completed=True
+            ).count()
+
+            completion_rate = 0
+
+            if students > 0:
+
+                completion_rate = round(
+                    (completed / students) * 100,
+                    2
+                )
+
+            courses.append({
+
+                "id": course.id,
+
+                "title": course.title,
+
+                "status": course.status,
+
+                "students": students,
+
+                "completed": completed,
+
+                "completion_rate": completion_rate,
+
+            })
+
+        return Response({
+
+            "statistics": {
+
+                "total_courses": total_courses,
+
+                "published_courses": published_courses,
+
+                "draft_courses": draft_courses,
+
+                "total_students": total_students,
+
+                "completed_students": completed_students,
+
+            },
+
+            "courses": courses,
+
+        })        
+
+
+class CourseStudentsAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+
+        try:
+
+            course = Course.objects.get(
+                id=course_id,
+                mentor=request.user
+            )
+
+        except Course.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Course not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        enrollments = Enrollment.objects.filter(
+            course=course,
+            is_active=True
+        ).select_related("student")
+
+        serializer = CourseStudentSerializer(
+            enrollments,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+
+class StudentProgressDetailAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id, student_id):
+
+        try:
+
+            course = Course.objects.get(
+                id=course_id,
+                mentor=request.user
+            )
+
+        except Course.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Course not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+
+            student = User.objects.get(
+                id=student_id,
+                role="student"
+            )
+
+        except User.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Student not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        total_lessons = Lesson.objects.filter(
+            module__course=course
+        ).count()
+
+        completed_lessons = LessonProgress.objects.filter(
+            student=student,
+            lesson__module__course=course,
+            is_completed=True
+        )
+
+        completed_count = completed_lessons.count()
+
+        progress = 0
+
+        if total_lessons > 0:
+
+            progress = round(
+                (completed_count / total_lessons) * 100,
+                2
+            )
+
+        serializer = CompletedLessonSerializer(
+            completed_lessons,
+            many=True
+        )
+
+        return Response({
+
+            "student": {
+
+                "id": student.id,
+                "name": student.get_full_name() or student.username,
+                "email": student.email,
+
+            },
+
+            "course": {
+
+                "id": course.id,
+                "title": course.title,
+
+            },
+
+            "statistics": {
+
+                "total_lessons": total_lessons,
+                "completed_lessons": completed_count,
+                "progress": progress,
+
+            },
+
+            "completed_lessons": serializer.data,
+
+        })
+
+
+class CourseStatisticsAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+
+        try:
+
+            course = Course.objects.get(
+                id=course_id,
+                mentor=request.user
+            )
+
+        except Course.DoesNotExist:
+
+            return Response(
+                {
+                    "error": "Course not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        modules_count = Module.objects.filter(
+            course=course
+        ).count()
+
+        lessons_count = Lesson.objects.filter(
+            module__course=course
+        ).count()
+
+        enrollments = Enrollment.objects.filter(
+            course=course,
+            is_active=True
+        )
+
+        enrolled_students = enrollments.count()
+
+        completed_students = 0
+
+        total_progress = 0
+
+        for enrollment in enrollments:
+
+            completed_lessons = LessonProgress.objects.filter(
+                student=enrollment.student,
+                lesson__module__course=course,
+                is_completed=True
+            ).count()
+
+            if lessons_count > 0:
+
+                progress = (
+                    completed_lessons / lessons_count
+                ) * 100
+
+            else:
+
+                progress = 0
+
+            total_progress += progress
+
+            if progress == 100:
+
+                completed_students += 1
+
+        completion_rate = 0
+
+        average_progress = 0
+
+        if enrolled_students > 0:
+
+            completion_rate = round(
+                (completed_students / enrolled_students) * 100,
+                2
+            )
+
+            average_progress = round(
+                total_progress / enrolled_students,
+                2
+            )
+
+        return Response({
+
+            "course": {
+
+                "id": course.id,
+                "title": course.title,
+
+            },
+
+            "statistics": {
+
+                "modules": modules_count,
+
+                "lessons": lessons_count,
+
+                "enrolled_students": enrolled_students,
+
+                "completed_students": completed_students,
+
+                "completion_rate": completion_rate,
+
+                "average_progress": average_progress,
+
+            }
+
+        })
+
+
+
+class AdminCourseAnalyticsAPIView(APIView):
+
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+
+        total_courses = Course.objects.count()
+
+        published_courses = Course.objects.filter(
+            status="published"
+        ).count()
+
+        draft_courses = Course.objects.filter(
+            status="draft"
+        ).count()
+
+        total_modules = Module.objects.count()
+
+        total_lessons = Lesson.objects.count()
+
+        total_enrollments = Enrollment.objects.count()
+
+        total_students = User.objects.filter(
+            role="student"
+        ).count()
+
+        total_mentors = User.objects.filter(
+            role="mentor"
+        ).count()
+
+        completed_courses = 0
+
+        for enrollment in Enrollment.objects.filter(is_active=True):
+
+            total = Lesson.objects.filter(
+                module__course=enrollment.course
+            ).count()
+
+            completed = LessonProgress.objects.filter(
+                student=enrollment.student,
+                lesson__module__course=enrollment.course,
+                is_completed=True
+            ).count()
+
+            if total > 0 and completed == total:
+
+                completed_courses += 1
+
+        popular_course = Course.objects.annotate(
+
+            students=Count("enrollments")
+
+        ).order_by("-students").first()
+
+        latest_courses = Course.objects.order_by(
+            "-created_at"
+        )[:5]
+
+        latest = []
+
+        for course in latest_courses:
+
+            latest.append({
+
+                "id": course.id,
+                "title": course.title,
+                "status": course.status,
+                "created_at": course.created_at,
+
+            })
+
+        return Response({
+
+            "statistics": {
+
+                "total_courses": total_courses,
+
+                "published_courses": published_courses,
+
+                "draft_courses": draft_courses,
+
+                "total_modules": total_modules,
+
+                "total_lessons": total_lessons,
+
+                "total_students": total_students,
+
+                "total_mentors": total_mentors,
+
+                "total_enrollments": total_enrollments,
+
+                "completed_courses": completed_courses,
+
+            },
+
+            "most_popular_course": {
+
+                "id": popular_course.id if popular_course else None,
+
+                "title": popular_course.title if popular_course else None,
+
+                "students": popular_course.students if popular_course else 0,
+
+            },
+
+            "latest_courses": latest
+
+        })

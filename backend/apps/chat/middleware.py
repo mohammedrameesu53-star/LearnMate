@@ -6,6 +6,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 # pyrefly: ignore [missing-import]
 from apps.accounts.models import User
+from urllib.parse import parse_qs
 
 
 from channels.db import database_sync_to_async
@@ -37,7 +38,6 @@ class JWTAuthMiddleware(BaseMiddleware):
             scope["user"] = user
 
             print("Authenticated User:", user.email)
-
         except Exception as e:
             print("Invalid Token")
             print(e)

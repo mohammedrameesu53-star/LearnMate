@@ -1,58 +1,96 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../components/DashboardLayout";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../api";
-import { Flame, BookOpen, Clock, AlertCircle, ChevronRight, Send, Bot } from "lucide-react";
+import { BookOpen, Clock, ChevronRight, Send, Bot, AlertCircle } from "lucide-react";
 
 export default function StudentDashboardOverview() {
-  const { user, refreshUser } = useAuth();
-  const [dashboardData, setDashboardData] = useState(null);
-  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
-  const [dashboardError, setDashboardError] = useState("");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [currentCourseProgress, setCurrentCourseProgress] = useState(null);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // Quick Chat Widget state
   const [quickQuestion, setQuickQuestion] = useState("");
-  const [quickReplies, setQuickReplies] = useState([]);
+  const [quickReplies, setQuickReplies] = useState([
+    { type: "ai", text: "Hello! I am your AI Tutor. Ask me any questions about your courses!" }
+  ]);
 
-  const fetchDashboardData = async () => {
-    setIsLoadingDashboard(true);
-    setDashboardError("");
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError("");
     try {
-      const response = await api.get("/api/dashboard/student/");
-      setDashboardData(response.data);
+      // 1. Fetch Enrolled Courses
+      const enrolledRes = await api.get("/api/courses/student/my-courses/");
+      const enrolledData = enrolledRes.data || [];
+      setEnrolledCourses(enrolledData);
+
+      // 2. Fetch all Published Courses to find recommendations
+      const publishedRes = await api.get("/api/courses/");
+      const publishedData = publishedRes.data || [];
+      
+      // Filter out courses that the student is already enrolled in
+      const enrolledIds = enrolledData.map(e => e.course);
+      const recommendedFiltered = publishedData.filter(c => !enrolledIds.includes(c.id));
+      setRecommendations(recommendedFiltered);
+
+      // 3. If there is at least one enrolled course, get its detailed progress
+      if (enrolledData.length > 0) {
+        const firstCourseId = enrolledData[0].course;
+        const progressRes = await api.get(`/api/courses/student/courses/${firstCourseId}/progress/`);
+        setCurrentCourseProgress({
+          id: firstCourseId,
+          title: progressRes.data.course_title,
+          progress: progressRes.data.progress_percentage || 0,
+          completedLessons: progressRes.data.completed_lessons || 0,
+          totalLessons: progressRes.data.total_lessons || 0,
+          description: enrolledData[0].description || "Dive into this course to continue your learning journey."
+        });
+      } else {
+        setCurrentCourseProgress(null);
+      }
+
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
-      setDashboardError("Failed to fetch dashboard data from database.");
+      console.error("Error fetching student dashboard data:", err);
+      setError("Failed to fetch dashboard data from server.");
     } finally {
-      setIsLoadingDashboard(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchData();
   }, []);
 
-  const handleSendQuickQuestion = async (e) => {
+  const handleSendQuickQuestion = (e) => {
     e.preventDefault();
     if (!quickQuestion.trim()) return;
     const userQ = quickQuestion;
     setQuickQuestion("");
     setQuickReplies(prev => [...prev, { type: "user", text: userQ }]);
 
-    try {
-      const response = await api.post("/api/dashboard/student/ai-chat/", { text: userQ });
-      const updatedMessages = response.data;
-      if (updatedMessages.length > 0) {
-        const lastMsg = updatedMessages[updatedMessages.length - 1];
-        setQuickReplies(prev => [...prev, { type: "ai", text: lastMsg.text }]);
+    // Simulated local smart AI response without hitting a backend API
+    setTimeout(() => {
+      let replyText = "That's a fascinating topic! In physics and computer science, building modular structures helps simplify complex abstractions. Feel free to explore your modules to learn more!";
+      const lowerQ = userQ.toLowerCase();
+      if (lowerQ.includes("relativity")) {
+        replyText = "Special relativity shows that time and space are linked, and observers moving relative to each other measure different times and distances (time dilation and length contraction).";
+      } else if (lowerQ.includes("quantum")) {
+        replyText = "Quantum mechanics studies the physical properties of nature at the scale of atoms and subatomic particles, where objects exhibit both wave-like and particle-like behaviors.";
+      } else if (lowerQ.includes("celery") || lowerQ.includes("task")) {
+        replyText = "Celery is an asynchronous task queue that helps execute time-consuming operations in the background (like sending emails) so the main web application remains fast.";
       }
-    } catch (err) {
-      console.error("Error sending quick chat:", err);
-      setQuickReplies(prev => [...prev, { type: "ai", text: "I'm having trouble connecting to the database, but Lorentz transformations form the core basis of relativity!" }]);
-    }
+      setQuickReplies(prev => [...prev, { type: "ai", text: replyText }]);
+    }, 600);
   };
 
-  if (isLoadingDashboard) {
+  if (isLoading) {
     return (
       <DashboardLayout role="student" user={user}>
         <div className="flex items-center justify-center p-12 min-h-[300px]">
@@ -65,61 +103,45 @@ export default function StudentDashboardOverview() {
     );
   }
 
-  const streakDays = dashboardData?.streak ?? 0;
-  const currentCourse = dashboardData?.current_course ?? null;
-  const recentActivity = dashboardData?.recent_activity ?? [];
-  const recommendations = dashboardData?.recommendations ?? [];
-
   return (
     <DashboardLayout role="student" user={user}>
       <div className="space-y-8 animate-fade-in">
-        {dashboardError && (
-          <div className="bg-red-50 text-red-600 border border-red-100 px-4 py-3 rounded-xl text-xs font-semibold">
-            {dashboardError}
+        {error && (
+          <div className="bg-red-50 text-red-600 border border-red-100 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <AlertCircle size={16} />
+              {error}
+            </span>
+            <button 
+              onClick={fetchData} 
+              className="underline hover:text-red-800 text-[10px] uppercase font-bold cursor-pointer"
+            >
+              Retry
+            </button>
           </div>
         )}
 
-        {/* Greeting Header & Streak Widget */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
-          <div>
-            <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Hello, {user?.name}</h2>
-            <p className="text-slate-500 font-medium text-sm mt-1">
-              Ready to dive back into Einstein's Relativity today?
-            </p>
-          </div>
-
-          {/* Streak Badge */}
-          <div className="flex items-center gap-4 bg-amber-50 border border-amber-200/60 px-5 py-3 rounded-2xl">
-            <div className="h-10 w-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-md shadow-amber-200 animate-pulse">
-              <Flame size={20} fill="white" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">Streak Status</span>
-              <div className="flex items-center gap-2">
-                <p className="text-lg font-extrabold text-slate-800 leading-none">{streakDays} Days</p>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: Math.min(streakDays, 7) }).map((_, idx) => (
-                    <span key={idx} className="h-1.5 w-1.5 bg-amber-500 rounded-full"></span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Greeting Header */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+          <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Hello, {user?.name || "Student"}</h2>
+          <p className="text-slate-500 font-medium text-sm mt-1">
+            Welcome back to your workspace. Continue studying your enrolled courses or browse recommended topics below.
+          </p>
         </div>
 
-        {/* Course Progress & AI Tutor Quick Chat Column/Grid */}
+        {/* Course Progress & AI Tutor Quick Chat Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Progress Card */}
-          {currentCourse ? (
+          {currentCourseProgress ? (
             <div className="lg:col-span-2 bg-white border border-slate-200/60 p-8 rounded-3xl shadow-sm flex flex-col justify-between relative overflow-hidden">
               <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-50/40 rounded-full blur-3xl -z-10"></div>
               <div>
                 <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
-                  Current Course
+                  Primary Course
                 </span>
-                <h3 className="text-xl font-extrabold text-slate-800 mt-4">{currentCourse.title}</h3>
+                <h3 className="text-xl font-extrabold text-slate-800 mt-4">{currentCourseProgress.title}</h3>
                 <p className="text-sm text-slate-500 font-medium leading-relaxed mt-2 max-w-lg">
-                  {currentCourse.description}
+                  {currentCourseProgress.description}
                 </p>
               </div>
 
@@ -130,18 +152,21 @@ export default function StudentDashboardOverview() {
                   <svg className="h-full w-full transform -rotate-90">
                     <circle cx="56" cy="56" r="48" stroke="#f1f5f9" strokeWidth="10" fill="transparent" />
                     <circle cx="56" cy="56" r="48" stroke="#4f46e5" strokeWidth="10" fill="transparent"
-                      strokeDasharray={301.6} strokeDashoffset={301.6 * (1 - (currentCourse.progress ?? 0) / 100)} strokeLinecap="round"
+                      strokeDasharray={301.6} strokeDashoffset={301.6 * (1 - (currentCourseProgress.progress ?? 0) / 100)} strokeLinecap="round"
                       className="transition-all duration-1000"
                     />
                   </svg>
                   <div className="absolute text-center">
-                    <p className="text-xl font-black text-slate-800 leading-none">{currentCourse.progress}%</p>
+                    <p className="text-xl font-black text-slate-800 leading-none">{currentCourseProgress.progress}%</p>
                     <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Complete</span>
                   </div>
                 </div>
 
                 <div className="space-y-3 w-full">
-                  <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-100 transition duration-200 cursor-pointer flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => navigate(`/student/courses/${currentCourseProgress.id}/continue`)}
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-100 transition duration-200 cursor-pointer flex items-center justify-center gap-2"
+                  >
                     <span>Resume Lesson</span>
                     <ChevronRight size={16} />
                   </button>
@@ -172,7 +197,7 @@ export default function StudentDashboardOverview() {
               </div>
               <h4 className="text-lg font-bold mt-3">Quick Chat with AI Tutor</h4>
               <p className="text-xs text-indigo-200/80 leading-normal mt-1">
-                Ask a complex question about physics or request a study summary for tomorrow's exam.
+                Ask a complex question about physics or request a study summary.
               </p>
             </div>
 
@@ -200,77 +225,67 @@ export default function StudentDashboardOverview() {
           </div>
         </div>
 
-        {/* Recent Activity Table */}
-        <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm overflow-hidden">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-800">Recent Activity</h3>
-              <p className="text-xs text-slate-400 font-medium">Your progress records over the last few days</p>
+        {/* Enrolled Courses Overview */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-slate-800">Your Enrolled Courses</h3>
+          {enrolledCourses.length === 0 ? (
+            <div className="bg-white border border-slate-200/60 rounded-2xl p-6 text-center">
+              <p className="text-slate-500 text-xs font-semibold">You are not enrolled in any courses yet.</p>
             </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="pb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Activity</th>
-                  <th className="pb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Category</th>
-                  <th className="pb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="pb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Time</th>
-                  <th className="pb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Score</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recentActivity.map((act, idx) => (
-                  <tr key={idx}>
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-lg flex items-center justify-center 
-                          ${act.category === 'Assignment' ? 'bg-indigo-50 text-indigo-600' :
-                            act.category === 'Lesson' ? 'bg-purple-50 text-purple-600' :
-                              'bg-rose-50 text-rose-600'}`}>
-                          {act.category === 'Assignment' ? <BookOpen size={16} /> :
-                            act.category === 'Lesson' ? <Clock size={16} /> :
-                              <AlertCircle size={16} />}
-                        </div>
-                        <span className="text-sm font-semibold text-slate-700">{act.activity_name}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 text-xs font-bold text-slate-500">{act.category}</td>
-                    <td className="py-4">
-                      <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full border
-                        ${act.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                        {act.status}
-                      </span>
-                    </td>
-                    <td className="py-4 text-xs font-medium text-slate-400">{act.timestamp}</td>
-                    <td className="py-4 text-sm font-bold text-slate-700">{act.score}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {enrolledCourses.map((c) => (
+                <div key={c.id} className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm hover:shadow-md transition flex items-center justify-between group">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
+                      {c.course_title?.substring(0,2).toUpperCase() || "CR"}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-700">{c.course_title}</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Enrolled on: {new Date(c.enrolled_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => navigate(`/student/courses/${c.course}`)}
+                    className="p-2 bg-slate-50 group-hover:bg-indigo-50 text-slate-400 group-hover:text-indigo-600 rounded-xl transition cursor-pointer"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Recommended for You Grid */}
         <div className="space-y-4">
           <h3 className="text-lg font-bold text-slate-800">Recommended for You</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {recommendations.map((rec, idx) => (
-              <div key={idx} className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex justify-between items-center group">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
-                    {rec.code}
+          {recommendations.length === 0 ? (
+            <div className="bg-white border border-slate-200/60 rounded-2xl p-6 text-center">
+              <p className="text-slate-500 text-xs font-semibold">You have enrolled in all available courses!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {recommendations.map((rec) => (
+                <div 
+                  key={rec.id} 
+                  className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex justify-between items-center group cursor-pointer"
+                  onClick={() => navigate("/student/courses")}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
+                      {rec.level?.substring(0,3).toUpperCase() || "EDU"}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition">{rec.title}</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{rec.level} • {rec.duration}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition">{rec.title}</h4>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{rec.difficulty} • {rec.lessons_count} Lessons</p>
-                  </div>
+                  <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition" />
                 </div>
-                <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition" />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

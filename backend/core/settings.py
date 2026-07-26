@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'channels',
-    "django_celery_beat",
+    'django_celery_beat',
 
     # Local Apps
     'apps.accounts',
@@ -143,6 +143,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 
 
@@ -198,7 +201,7 @@ CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE
+CELERY_TIMEZONE = "Asia/Kolkata"
 
 # Django Celery Beat Database Scheduler configurations
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
