@@ -25,5 +25,6 @@ urlpatterns = [
     path('api/dashboard/',include('apps.dashboard.urls')),
     path('api/profile/',include('apps.profiles.urls')),
     path('api/chat/',include('apps.chat.urls')),
-    path('api/courses/',include('apps.courses.urls'))
+    path('api/courses/',include('apps.courses.urls')),
+    path("api/ai/", include("apps.ai.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,37 +1,204 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../../../components/DashboardLayout";
 import { useAuth } from "../../../context/AuthContext";
+import api from "../../../api";
+import { Bot, Send, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function MentorAITutor() {
   const { user } = useAuth();
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const bottomRef = useRef(null);
+
+  // Auto-scroll to the bottom of the chat
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [chatMessages]);
+
+  // Load chat history on mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("learnmate_mentor_ai_chat_history");
+    if (savedHistory) {
+      try {
+        setChatMessages(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Error parsing mentor chat history:", e);
+        setChatMessages([
+          {
+            sender: "ai",
+            text: "👋 Hello! I'm your LearnMate Mentor Assistant. I can help you draft course modules, design quizzes, review syllabus progress, or suggest interventions for struggling students.",
+          },
+        ]);
+      }
+    } else {
+      setChatMessages([
+        {
+          sender: "ai",
+          text: "👋 Hello! I'm your LearnMate Mentor Assistant. I can help you draft course modules, design quizzes, review syllabus progress, or suggest interventions for struggling students.",
+        },
+      ]);
+    }
+  }, []);
+
+  const handleSendChat = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    const message = chatInput;
+    setChatInput("");
+
+    const updatedMessages = [
+      ...chatMessages,
+      {
+        sender: "user",
+        text: message,
+      },
+    ];
+
+    setChatMessages([
+      ...updatedMessages,
+      {
+        sender: "ai",
+        text: "Thinking...",
+        loading: true,
+      },
+    ]);
+    setChatLoading(true);
+
+    try {
+      const response = await api.post("/api/ai/chat/", {
+        message,
+      });
+
+      const aiReply = response.data.response;
+      const finalMessages = [
+        ...updatedMessages,
+        {
+          sender: "ai",
+          text: aiReply,
+        },
+      ];
+
+      setChatMessages(finalMessages);
+      localStorage.setItem("learnmate_mentor_ai_chat_history", JSON.stringify(finalMessages));
+    } catch (error) {
+      console.error("Error from AI chatbot API:", error);
+      const finalMessages = [
+        ...updatedMessages,
+        {
+          sender: "ai",
+          text: "Sorry, I encountered an error while trying to process your request. Please try again.",
+        },
+      ];
+      setChatMessages(finalMessages);
+      localStorage.setItem("learnmate_mentor_ai_chat_history", JSON.stringify(finalMessages));
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm("Are you sure you want to clear your conversation history?")) {
+      const defaultChat = [
+        {
+          sender: "ai",
+          text: "👋 Hello! I'm your LearnMate Mentor Assistant. I can help you draft course modules, design quizzes, review syllabus progress, or suggest interventions for struggling students.",
+        },
+      ];
+      setChatMessages(defaultChat);
+      localStorage.setItem("learnmate_mentor_ai_chat_history", JSON.stringify(defaultChat));
+    }
+  };
 
   return (
     <DashboardLayout role="mentor" user={user}>
       <div className="space-y-6 animate-fade-in">
+        {/* Header */}
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-800">AI Diagnostic Console</h2>
-          <p className="text-sm text-slate-500 font-medium">AI monitoring of student learning hurdles and progression</p>
+          <h2 className="text-2xl font-extrabold text-slate-800">AI Teaching Assistant</h2>
+          <p className="text-sm text-slate-500 font-medium">Interact with your AI assistant to generate class activities, draft syllabi, or prepare quizzes</p>
         </div>
 
-        <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm">
-          <h3 className="text-base font-bold text-slate-800 mb-4">Intervention Indicators</h3>
-          <div className="space-y-4">
-            {[
-              { name: "Marcus Wright", reason: "Weakness in neural net math calculations, repeatedly fails backprop test quiz.", priority: "High" },
-              { name: "Leila Jahani", reason: "Inactivity block for 5 days. Suggested action: Check-in sync.", priority: "Medium" }
-            ].map((ind, i) => (
-              <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/40 flex items-start gap-4">
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0 ${ind.priority === 'High' ? 'bg-rose-500' : 'bg-amber-500'}`}>
-                  {ind.priority[0]}
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-700">{ind.name}</h4>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{ind.reason}</p>
+        {/* Chatbot container */}
+        <div className="h-[calc(100vh-16rem)] flex flex-col bg-white border border-slate-200/60 rounded-3xl shadow-sm overflow-hidden min-h-[500px]">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                <Bot size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">AI Mentor Assistant</h3>
+                <span className="text-[10px] text-indigo-600 font-bold flex items-center gap-1">
+                  <Sparkles size={10} className="animate-pulse" />
+                  Groq Engine Connected
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleClearHistory}
+              className="text-xs text-rose-600 hover:text-rose-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+            >
+              Clear History
+            </button>
+          </div>
+
+          {/* Messages body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/20">
+            {chatMessages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none shadow-md shadow-indigo-100' : 'bg-white border border-slate-200/80 text-slate-800 rounded-bl-none shadow-sm'}`}>
+                  {msg.loading ? (
+                    <div className="flex items-center gap-1.5 py-1">
+                      <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    </div>
+                  ) : (
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc ml-5 mb-2">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal ml-5 mb-2">{children}</ol>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                        code: ({ children }) => <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-xs">{children}</code>,
+                        pre: ({ children }) => <pre className="bg-slate-100 p-3 rounded-lg overflow-x-auto my-2 font-mono text-xs">{children}</pre>
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
+                  )}
                 </div>
               </div>
             ))}
+            <div ref={bottomRef}></div>
           </div>
+
+          {/* Input form */}
+          <form onSubmit={handleSendChat} className="p-4 border-t border-slate-100 bg-white flex gap-3">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Ask Mentor Assistant to draft course curriculum, design exercises..."
+              className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              disabled={chatLoading}
+            />
+            <button 
+              type="submit" 
+              className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition cursor-pointer flex items-center gap-2 disabled:bg-indigo-400"
+              disabled={chatLoading}
+            >
+              <span>Send</span>
+              <Send size={14} />
+            </button>
+          </form>
         </div>
+
       </div>
     </DashboardLayout>
   );

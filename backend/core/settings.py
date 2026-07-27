@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'apps.dashboard',
     'apps.profiles',
     'apps.chat',
-    'apps.courses'
+    'apps.courses',
+    'apps.ai'
     
 ]
 MIDDLEWARE = [
@@ -205,3 +206,6 @@ CELERY_TIMEZONE = "Asia/Kolkata"
 
 # Django Celery Beat Database Scheduler configurations
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+
+GROQ_API_KEY = config("GROQ_API_KEY")

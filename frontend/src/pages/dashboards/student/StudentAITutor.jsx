@@ -3,39 +3,122 @@ import DashboardLayout from "../../../components/DashboardLayout";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../api";
 import { Bot, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { useRef } from "react";
 
 export default function StudentAITutor() {
   const { user } = useAuth();
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const bottomRef = useRef(null);
 
-  const fetchChatHistory = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get("/api/dashboard/student/");
-      if (response.data.ai_chat_messages) {
-        setChatMessages(response.data.ai_chat_messages);
-      }
-    } catch (err) {
-      console.error("Error fetching chat history:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Auto-scroll to the bottom when messages change
   useEffect(() => {
-    fetchChatHistory();
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [chatMessages]);
+
+  // Load chat history from localStorage on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem("learnmate_ai_chat_history");
+    if (savedHistory) {
+      try {
+        setChatMessages(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Error parsing saved chat history:", e);
+        setChatMessages([
+          {
+            sender: "ai",
+            text: "👋 Hello! I'm your LearnMate AI Tutor. Ask me anything about programming, your courses, or any topic you'd like to learn.",
+          },
+        ]);
+      }
+    } else {
+      setChatMessages([
+        {
+          sender: "ai",
+          text: "👋 Hello! I'm your LearnMate AI Tutor. Ask me anything about programming, your courses, or any topic you'd like to learn.",
+        },
+      ]);
+    }
+    setIsLoading(false);
   }, []);
 
   const handleSendChat = async (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
-    const input = chatInput;
-    setChatInput("");
-    setChatMessages(prev => [...prev, { sender: "user", text: input }]);
-    console.log("AI Chat will be implemented later.");
 
+    if (!chatInput.trim()) return;
+
+    const message = chatInput;
+    setChatInput("");
+
+    // Prepare updated message list with user's new message
+    const updatedMessages = [
+      ...chatMessages,
+      {
+        sender: "user",
+        text: message,
+      },
+    ];
+
+    // Optimistically render the user message and a typing indicator
+    setChatMessages([
+      ...updatedMessages,
+      {
+        sender: "ai",
+        text: "Thinking...",
+        loading: true,
+      },
+    ]);
+
+    try {
+      // POST the query message to backend API route
+      const response = await api.post("/api/ai/chat/", {
+        message,
+      });
+
+      const aiReply = response.data.response;
+
+      const finalMessages = [
+        ...updatedMessages,
+        {
+          sender: "ai",
+          text: aiReply,
+        },
+      ];
+
+      setChatMessages(finalMessages);
+      localStorage.setItem("learnmate_ai_chat_history", JSON.stringify(finalMessages));
+    } catch (error) {
+      console.error("Error communicating with AI Tutor:", error);
+
+      const finalMessages = [
+        ...updatedMessages,
+        {
+          sender: "ai",
+          text: "Sorry, I encountered an issue connecting to the learning engine. Please try sending your message again.",
+        },
+      ];
+
+      setChatMessages(finalMessages);
+      localStorage.setItem("learnmate_ai_chat_history", JSON.stringify(finalMessages));
+    }
+  };
+
+  // Provide a clean button to wipe chat history if needed
+  const handleClearHistory = () => {
+    if (window.confirm("Are you sure you want to clear your AI Tutor conversation history?")) {
+      const defaultChat = [
+        {
+          sender: "ai",
+          text: "👋 Hello! I'm your LearnMate AI Tutor. Ask me anything about programming, your courses, or any topic you'd like to learn.",
+        },
+      ];
+      setChatMessages(defaultChat);
+      localStorage.setItem("learnmate_ai_chat_history", JSON.stringify(defaultChat));
+    }
   };
 
   if (isLoading) {
@@ -55,17 +138,25 @@ export default function StudentAITutor() {
     <DashboardLayout role="student" user={user}>
       <div className="h-[calc(100vh-12rem)] flex flex-col bg-white border border-slate-200/60 rounded-3xl shadow-sm overflow-hidden animate-fade-in">
         {/* AI Tutor Chat Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50/50">
-          <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
-            <Bot size={18} />
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+              <Bot size={18} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">LearnMate AI Tutor</h3>
+              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                Active & Listening
+              </span>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-800">LearnMate AI Tutor</h3>
-            <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-              <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span>
-              Active & Listening
-            </span>
-          </div>
+          <button
+            onClick={handleClearHistory}
+            className="text-xs text-rose-600 hover:text-rose-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+          >
+            Clear History
+          </button>
         </div>
 
         {/* Chat History Panel */}
@@ -73,10 +164,31 @@ export default function StudentAITutor() {
           {chatMessages.map((msg, i) => (
             <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none shadow-md shadow-indigo-100' : 'bg-white border border-slate-200/80 text-slate-800 rounded-bl-none shadow-sm'}`}>
-                {msg.text}
+                {msg.loading ? (
+                  <div className="flex items-center gap-1.5 py-1">
+                    <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                ) : (
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc ml-5 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal ml-5 mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      code: ({ children }) => <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-xs">{children}</code>,
+                      pre: ({ children }) => <pre className="bg-slate-100 p-3 rounded-lg overflow-x-auto my-2 font-mono text-xs">{children}</pre>
+                    }}
+                  >
+                    {msg.text}
+                  </ReactMarkdown>
+                )}
               </div>
             </div>
           ))}
+          {/* 👇 Auto-scroll target */}
+          <div ref={bottomRef}></div>
         </div>
 
         {/* Chat Input Console */}
