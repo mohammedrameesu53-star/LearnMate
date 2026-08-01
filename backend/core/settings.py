@@ -52,11 +52,11 @@ INSTALLED_APPS = [
 
     # Local Apps
     'apps.accounts',
-    'apps.dashboard',
     'apps.profiles',
     'apps.chat',
     'apps.courses',
-    'apps.ai'
+    'apps.ai',
+    'apps.adminpanel'
     
 ]
 MIDDLEWARE = [

@@ -16,6 +16,7 @@ class Course(models.Model):
     STATUS_CHOICES = [
         ("draft", "Draft"),
         ("published", "Published"),
+        ("rejected", "Rejected"),
     ]
 
     title = models.CharField(max_length=255)

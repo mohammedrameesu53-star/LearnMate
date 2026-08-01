@@ -770,112 +770,6 @@ class LessonResourceDetailView(APIView):
             status=status.HTTP_200_OK
         )
 
-
-
-
-class PublishCourseAPIView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request, course_id):
-
-        try:
-            course = Course.objects.get(
-                id=course_id
-            )
-
-        except Course.DoesNotExist:
-
-            return Response(
-                {
-                    "error": "Course not found."
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if request.user != course.mentor:
-
-            return Response(
-                {
-                    "error": "Permission denied."
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        if course.status == "published":
-
-            return Response(
-                {
-                    "message": "Course is already published."
-                }
-            )
-
-        # ---------- Future Validations ----------
-        #
-        # Check course has modules
-        # Check modules have lessons
-        # Check thumbnail exists
-        # Check description exists
-        #
-        # ----------------------------------------
-
-        course.status = "published"
-        course.save()
-
-        return Response(
-            {
-                "message": "Course published successfully."
-            }
-        )
-
-
-class UnpublishCourseAPIView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request, course_id):
-
-        try:
-            course = Course.objects.get(
-                id=course_id
-            )
-
-        except Course.DoesNotExist:
-
-            return Response(
-                {
-                    "error": "Course not found."
-                },
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if request.user != course.mentor:
-
-            return Response(
-                {
-                    "error": "Permission denied."
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        if course.status == "draft":
-
-            return Response(
-                {
-                    "message": "Course is already unpublished."
-                }
-            )
-
-        course.status = "draft"
-        course.save()
-
-        return Response(
-            {
-                "message": "Course unpublished successfully."
-            }
-        )
-
-
 # Student Learning Module
 # *********************************
 
@@ -1507,7 +1401,7 @@ class CourseCompletionAPIView(APIView):
         send_course_completion_email.delay(
             request.user.id,
             course.id
-)
+        )
 
 
         return Response(

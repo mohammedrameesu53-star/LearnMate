@@ -156,10 +156,7 @@ class VerifyOTPView(APIView):
 
         buffer = BytesIO()
 
-        qr.save(
-            buffer,
-            format="PNG"
-        )
+        qr.save(buffer)
 
         qr_base64 = base64.b64encode(
             buffer.getvalue()

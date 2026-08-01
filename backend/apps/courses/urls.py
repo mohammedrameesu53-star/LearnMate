@@ -1,6 +1,6 @@
 # pyrefly: ignore [missing-import]
 from django.urls import path
-from .views import CreateCourseView,MyCoursesView,CourseDetailView,UpdateCourseView,DeleteCourseView,CreateModuleView,ModuleListView,UpdateModuleView,DeleteModuleView,CreateLessonView,LessonListView,UpdateLessonView,DeleteLessonView,LessonResourceView,LessonResourceDetailView,PublishCourseAPIView,UnpublishCourseAPIView,PublishedCourseListView,StudentCourseDetailsAPIView,EnrollmentAPIView,MyCoursesAPIView,ModuleListAPIView,LessonListAPIView,LessonDetailsAPIView,MarkLessonCompleteAPIView,CourseProgressAPIView,ContinueLearningAPIView,CourseCompletionAPIView,MentorDashboardAPIView,CourseStudentsAPIView,StudentProgressDetailAPIView,CourseStatisticsAPIView,AdminCourseAnalyticsAPIView
+from .views import CreateCourseView,MyCoursesView,CourseDetailView,UpdateCourseView,DeleteCourseView,CreateModuleView,ModuleListView,UpdateModuleView,DeleteModuleView,CreateLessonView,LessonListView,UpdateLessonView,DeleteLessonView,LessonResourceView,LessonResourceDetailView,PublishedCourseListView,StudentCourseDetailsAPIView,EnrollmentAPIView,MyCoursesAPIView,ModuleListAPIView,LessonListAPIView,LessonDetailsAPIView,MarkLessonCompleteAPIView,CourseProgressAPIView,ContinueLearningAPIView,CourseCompletionAPIView,MentorDashboardAPIView,CourseStudentsAPIView,StudentProgressDetailAPIView,CourseStatisticsAPIView,AdminCourseAnalyticsAPIView
 
 urlpatterns=[
     # Mentor Course CRUD.
@@ -94,21 +94,7 @@ urlpatterns=[
         name="lesson-resource-detail",
     ),
 
-    # Publish & Unpublish
-        path(
-        "<int:course_id>/publish/",
-        PublishCourseAPIView.as_view(),
-        name="publish-course",
-    ),
-
-        path(
-        "<int:course_id>/unpublish/",
-        UnpublishCourseAPIView.as_view(),
-        name="unpublish-course",
-    ),
-
-
-
+    
     # Student Learning Module
     # *************************************************
     path(
