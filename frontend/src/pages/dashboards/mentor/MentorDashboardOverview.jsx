@@ -185,15 +185,15 @@ export default function MentorDashboardOverview() {
                         {c.students} Students Enrolled • <span className="text-indigo-600 font-bold">{c.completion_rate}% completion rate</span>
                       </p>
                     </div>
-                    
+
                     <div className="flex gap-2 w-full sm:w-auto">
-                      <button 
+                      <button
                         onClick={() => navigate(`/mentor/courses/${c.id}/students`)}
                         className="flex-1 sm:flex-none px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-xs font-bold transition cursor-pointer text-center"
                       >
                         Mentees
                       </button>
-                      <button 
+                      <button
                         onClick={() => navigate(`/mentor/courses/${c.id}/statistics`)}
                         className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer text-center"
                       >
@@ -212,7 +212,7 @@ export default function MentorDashboardOverview() {
               <h4 className="text-sm font-bold text-slate-800">Upcoming Syncs</h4>
               <Calendar size={16} className="text-slate-400" />
             </div>
-            
+
             <div className="space-y-3">
               {syncs.map((sync, i) => (
                 <div key={i} className="flex gap-3 items-center border border-slate-50 p-2.5 rounded-xl">

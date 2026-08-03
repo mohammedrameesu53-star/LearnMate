@@ -13,6 +13,7 @@ from apps.accounts.permissions import IsAdmin
 from apps.accounts.models import User
 # pyrefly: ignore [missing-import]
 from apps.courses.models import Enrollment
+from django.db.models import Count, Q
 
 from ..serializers.students import (
     AdminStudentListSerializer,
@@ -25,6 +26,8 @@ class AdminStudentListAPIView(APIView):
 
     def get(self, request):
 
+        search = request.GET.get("search")
+
         students = (
             User.objects
             .filter(role="student")
@@ -33,6 +36,12 @@ class AdminStudentListAPIView(APIView):
             )
             .order_by("-created_at")
         )
+
+        if search:
+            students = students.filter(
+                Q(username__icontains=search) |
+                Q(email__icontains=search)
+            )
 
         serializer = AdminStudentListSerializer(
             students,
@@ -140,3 +149,5 @@ class AdminStudentDeleteAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )        
+
+        # apps.adminpanel.views.student.py

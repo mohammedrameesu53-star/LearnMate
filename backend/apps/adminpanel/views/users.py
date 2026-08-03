@@ -48,6 +48,13 @@ class AdminUserAPIView(APIView):
             )
 
     def patch(self, request, user_id):
+
+        if str(user_id) == str(request.user.id):
+            return Response(
+                {"message": "You cannot modify your own account from this endpoint."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             user = User.objects.get(id=user_id)
 
@@ -74,6 +81,12 @@ class AdminUserAPIView(APIView):
             )
 
     def delete(self, request, user_id):
+        if str(user_id) == str(request.user.id):
+            return Response(
+                {"message": "You cannot delete your own account."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             user = User.objects.get(id=user_id)
 
@@ -88,4 +101,6 @@ class AdminUserAPIView(APIView):
             return Response(
                 {"message": "User not found"},
                 status=status.HTTP_404_NOT_FOUND
-            )        
+            )
+
+# apps.adminpanel.views.user

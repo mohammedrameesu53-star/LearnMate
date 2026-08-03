@@ -33,11 +33,12 @@ import CourseSyllabusEditor from './pages/dashboards/mentor/CourseSyllabusEditor
 // Admin pages
 import AdminDashboardOverview from './pages/dashboards/admin/AdminDashboardOverview';
 import AdminCourses from './pages/dashboards/admin/AdminCourses';
-import AdminResources from './pages/dashboards/admin/AdminResources';
 import AdminAITutor from './pages/dashboards/admin/AdminAITutor';
 import AdminMessages from './pages/dashboards/admin/AdminMessages';
-import AdminSettings from './pages/dashboards/admin/AdminSettings';
 import AdminUsers from './pages/dashboards/admin/AdminUsers';
+import AdminMentors from './pages/dashboards/admin/AdminMentors';
+import AdminStudents from './pages/dashboards/admin/AdminStudents';
+import AdminReports from './pages/dashboards/admin/AdminReports';
 
 export default function App() {
     return (
@@ -76,11 +77,12 @@ export default function App() {
                     {/* Admin Protected Routes */}
                     <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboardOverview /></ProtectedRoute>} />
                     <Route path="/admin/courses" element={<ProtectedRoute allowedRoles={['admin']}><AdminCourses /></ProtectedRoute>} />
-                    <Route path="/admin/resources" element={<ProtectedRoute allowedRoles={['admin']}><AdminResources /></ProtectedRoute>} />
+                    <Route path="/admin/mentors" element={<ProtectedRoute allowedRoles={['admin']}><AdminMentors /></ProtectedRoute>} />
+                    <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['admin']}><AdminStudents /></ProtectedRoute>} />
+                    <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
+                    <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><AdminReports /></ProtectedRoute>} />
                     <Route path="/admin/ai-tutor" element={<ProtectedRoute allowedRoles={['admin']}><AdminAITutor /></ProtectedRoute>} />
                     <Route path="/admin/messages" element={<ProtectedRoute allowedRoles={['admin']}><AdminMessages /></ProtectedRoute>} />
-                    <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettings /></ProtectedRoute>} />
-                    <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
 
                     {/* Redirects for legacy routes */}
                     <Route path="/student-dashboard" element={<Navigate to="/student/dashboard" replace />} />

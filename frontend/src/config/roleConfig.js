@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, FileText, Bot, MessageSquare, Settings, Users } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Bot, MessageSquare, Users, GraduationCap, UserCog, BarChart3, FileText, Settings } from 'lucide-react';
 
 export const roleConfig = {
   student: {
@@ -11,7 +11,6 @@ export const roleConfig = {
       { name: "Messages", icon: MessageSquare, path: "/student/messages" },
       { name: "Settings", icon: Settings, path: "/student/settings" },
     ],
-
   },
   mentor: {
     label: "Mentor",
@@ -23,19 +22,18 @@ export const roleConfig = {
       { name: "Messages", icon: MessageSquare, path: "/mentor/messages" },
       { name: "Settings", icon: Settings, path: "/mentor/settings" },
     ],
-
   },
   admin: {
     label: "Admin",
     navItems: [
       { name: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
       { name: "Courses", icon: BookOpen, path: "/admin/courses" },
-      { name: "Resources", icon: FileText, path: "/admin/resources" },
+      { name: "Mentors", icon: UserCog, path: "/admin/mentors" },
+      { name: "Students", icon: GraduationCap, path: "/admin/students" },
+      { name: "Users", icon: Users, path: "/admin/users" },
+      { name: "Reports", icon: BarChart3, path: "/admin/reports" },
       { name: "AI Tutor", icon: Bot, path: "/admin/ai-tutor" },
       { name: "Messages", icon: MessageSquare, path: "/admin/messages" },
-      { name: "Settings", icon: Settings, path: "/admin/settings" },
-      { name: "Users", icon: Users, path: "/admin/users" },
     ],
-
   },
 };

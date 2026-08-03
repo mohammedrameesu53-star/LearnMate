@@ -110,19 +110,6 @@ export default function MentorCourses() {
     }
   };
 
-  const handlePublishToggle = async (courseId, currentStatus) => {
-    try {
-      if (currentStatus === "published") {
-        await api.patch(`/api/courses/${courseId}/unpublish/`);
-      } else {
-        await api.patch(`/api/courses/${courseId}/publish/`);
-      }
-      await fetchCourses();
-    } catch (err) {
-      console.error("Error toggling publish state:", err);
-      alert(err.response?.data?.error || "Failed to toggle publish status.");
-    }
-  };
 
   if (isLoading) {
     return (
@@ -155,7 +142,7 @@ export default function MentorCourses() {
             <h2 className="text-2xl font-extrabold text-slate-800">Your Coordinated Courses</h2>
             <p className="text-sm text-slate-500 font-medium">Create, edit, coordinate, and publish syllabus files</p>
           </div>
-          <button 
+          <button
             onClick={openCreateModal}
             className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
@@ -177,31 +164,31 @@ export default function MentorCourses() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Course Title</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={courseTitle} 
-                    onChange={e => setCourseTitle(e.target.value)} 
-                    placeholder="e.g. Introduction to Quantum Physics" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                  <input
+                    type="text"
+                    required
+                    value={courseTitle}
+                    onChange={e => setCourseTitle(e.target.value)}
+                    placeholder="e.g. Introduction to Quantum Physics"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Description</label>
-                  <textarea 
-                    value={courseDesc} 
-                    onChange={e => setCourseDesc(e.target.value)} 
-                    placeholder="Provide a detailed syllabus overview..." 
-                    rows="3" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none" 
+                  <textarea
+                    value={courseDesc}
+                    onChange={e => setCourseDesc(e.target.value)}
+                    placeholder="Provide a detailed syllabus overview..."
+                    rows="3"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Level</label>
-                    <select 
-                      value={courseLevel} 
-                      onChange={e => setCourseLevel(e.target.value)} 
+                    <select
+                      value={courseLevel}
+                      onChange={e => setCourseLevel(e.target.value)}
                       className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                     >
                       <option value="beginner">Beginner</option>
@@ -211,13 +198,13 @@ export default function MentorCourses() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Duration</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={courseDuration} 
-                      onChange={e => setCourseDuration(e.target.value)} 
-                      placeholder="e.g. 8 weeks" 
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                    <input
+                      type="text"
+                      required
+                      value={courseDuration}
+                      onChange={e => setCourseDuration(e.target.value)}
+                      placeholder="e.g. 8 weeks"
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                     />
                   </div>
                 </div>
@@ -240,8 +227,8 @@ export default function MentorCourses() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {courses.map((c) => (
-              <div 
-                key={c.id} 
+              <div
+                key={c.id}
                 className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm flex flex-col justify-between"
               >
                 <div>
@@ -250,15 +237,15 @@ export default function MentorCourses() {
                       {c.level || "Beginner"}
                     </span>
                     <div className="flex gap-2 shrink-0">
-                      <button 
-                        onClick={() => openEditModal(c)} 
+                      <button
+                        onClick={() => openEditModal(c)}
                         className="p-1.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-lg transition cursor-pointer"
                         title="Edit course settings"
                       >
                         <Edit2 size={12} />
                       </button>
-                      <button 
-                        onClick={() => handleDelete(c.id)} 
+                      <button
+                        onClick={() => handleDelete(c.id)}
                         className="p-1.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer"
                         title="Delete course"
                       >
@@ -275,34 +262,15 @@ export default function MentorCourses() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t border-slate-100">
-                  <button 
-                    onClick={() => handlePublishToggle(c.id, c.status)}
-                    className={`flex-1 py-2 px-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer 
-                      ${c.status === 'published' 
-                        ? 'bg-rose-50 hover:bg-rose-100 border-rose-100 text-rose-600' 
-                        : 'bg-indigo-50 hover:bg-indigo-100 border-indigo-100 text-indigo-600'}`}
-                  >
-                    {c.status === 'published' ? (
-                      <>
-                        <EyeOff size={14} />
-                        <span>Unpublish</span>
-                      </>
-                    ) : (
-                      <>
-                        <Globe size={14} />
-                        <span>Publish</span>
-                      </>
-                    )}
-                  </button>
 
-                  <button 
+                  <button
                     onClick={() => navigate(`/mentor/courses/${c.id}/students`)}
                     className="flex-1 py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/40 text-xs font-bold transition cursor-pointer text-center"
                   >
                     Mentees
                   </button>
 
-                  <button 
+                  <button
                     onClick={() => navigate(`/mentor/courses/${c.id}/syllabus`)}
                     className="flex-1 py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-indigo-55 bg-indigo-50 text-indigo-600 border border-indigo-100 text-xs font-bold transition cursor-pointer text-center"
                   >
