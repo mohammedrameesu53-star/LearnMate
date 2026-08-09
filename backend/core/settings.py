@@ -209,3 +209,5 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
 GROQ_API_KEY = config("GROQ_API_KEY")
+
+AI_SERVICE_URL = "http://localhost:8001"

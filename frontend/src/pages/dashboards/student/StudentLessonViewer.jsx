@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../../components/DashboardLayout";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../api";
+import LessonAIChat from "../../../components/LessonAIChat";
 import { Play, CheckCircle2, AlertCircle, FileText, Download, ArrowLeft, ArrowRight, Video } from "lucide-react";
 
 export default function StudentLessonViewer() {
@@ -13,7 +14,7 @@ export default function StudentLessonViewer() {
   const [lesson, setLesson] = useState(null);
   const [resources, setResources] = useState([]);
   const [isCompleted, setIsCompleted] = useState(false);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +33,7 @@ export default function StudentLessonViewer() {
       // Check progress status
       const progressRes = await api.get(`/api/courses/student/courses/${courseId}/progress/`);
       const completedList = progressRes.data || {};
-      
+
       // 2. Fetch Resources
       const resourcesRes = await api.get(`/api/courses/lessons/${lessonId}/resources/`);
       setResources(resourcesRes.data || []);
@@ -99,7 +100,7 @@ export default function StudentLessonViewer() {
     <DashboardLayout role="student" user={user}>
       <div className="space-y-6 animate-fade-in max-w-4xl mx-auto pb-12">
         {/* Back Link */}
-        <button 
+        <button
           onClick={() => navigate(`/student/courses/${courseId}`)}
           className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 transition cursor-pointer"
         >
@@ -122,8 +123,8 @@ export default function StudentLessonViewer() {
         {/* Video Player / Presentation Block */}
         {embedVideoUrl ? (
           <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-sm bg-slate-900 border border-slate-200/50">
-            <iframe 
-              src={embedVideoUrl} 
+            <iframe
+              src={embedVideoUrl}
               title={lesson?.title}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -151,12 +152,12 @@ export default function StudentLessonViewer() {
           </div>
 
           <div className="shrink-0 w-full sm:w-auto">
-            <button 
+            <button
               disabled={isCompleted || isCompleting}
               onClick={handleMarkComplete}
               className={`w-full sm:w-auto px-6 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer 
-                ${isCompleted 
-                  ? 'bg-emerald-50 border border-emerald-100 text-emerald-600 cursor-default' 
+                ${isCompleted
+                  ? 'bg-emerald-50 border border-emerald-100 text-emerald-600 cursor-default'
                   : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-100'}`}
             >
               <CheckCircle2 size={16} />
@@ -173,8 +174,8 @@ export default function StudentLessonViewer() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {resources.map((res) => {
-                const downloadUrl = res.file 
-                  ? `http://127.0.0.1:8000${res.file}` 
+                const downloadUrl = res.file
+                  ? `http://127.0.0.1:8000${res.file}`
                   : res.external_url;
 
                 return (
@@ -184,9 +185,9 @@ export default function StudentLessonViewer() {
                       <span className="text-xs font-semibold text-slate-700 truncate">{res.title}</span>
                     </div>
                     {downloadUrl && (
-                      <a 
-                        href={downloadUrl} 
-                        target="_blank" 
+                      <a
+                        href={downloadUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="h-8 w-8 rounded-lg bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 text-slate-400 flex items-center justify-center transition cursor-pointer shrink-0"
                       >
@@ -199,6 +200,13 @@ export default function StudentLessonViewer() {
             </div>
           )}
         </div>
+
+        {/* AI Tutor - scoped to this lesson's course content */}
+        <LessonAIChat
+          courseId={courseId}
+          lessonId={lessonId}
+          lessonTitle={lesson?.title}
+        />
       </div>
     </DashboardLayout>
   );

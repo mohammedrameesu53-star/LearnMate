@@ -1,9 +1,16 @@
+# pyrefly: ignore [missing-import]
 from celery import shared_task
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
-from .models import Course,Enrollment, LessonProgress
+from .models import Course,Enrollment, LessonProgress,Lesson
+# pyrefly: ignore [missing-import]
+from apps.courses.services.transcription import get_lesson_transcript
 from django.utils import timezone
 from datetime import timedelta
+import requests
+# pyrefly: ignore [missing-import]
+from django.conf import settings
+
 
 User = get_user_model()
 
@@ -111,6 +118,65 @@ def send_inactivity_reminders():
     return f"{reminders_sent} reminder(s) sent successfully."
 
 
+@shared_task
+def generate_lesson_transcript(lesson_id):
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+    except Lesson.DoesNotExist:
+        return
 
-    return "Reminder task completed."        
+    if not lesson.video_url:
+        lesson.transcript_status = "failed"
+        lesson.save(update_fields=["transcript_status"])
+        return
 
+    lesson.transcript_status = "processing"
+    lesson.save(update_fields=["transcript_status"])
+
+    try:
+        result = get_lesson_transcript(lesson.video_url)
+
+        lesson.original_transcript = result["original_transcript"]
+        lesson.transcript = result["transcript"]
+        lesson.transcript_status = "completed"
+        lesson.save(update_fields=[
+            "original_transcript", "transcript", "transcript_status"
+        ])
+
+    # Automatically trigger embedding now that we have a transcript
+        embed_lesson_transcript.delay(lesson.id)
+
+    except Exception as e:
+        lesson.transcript_status = "failed"
+        lesson.save(update_fields=["transcript_status"])
+        # Log this properly in production (e.g. via Celery's logger or Sentry)
+        print(f"Transcription failed for lesson {lesson_id}: {e}")
+
+
+@shared_task
+def embed_lesson_transcript(lesson_id):
+    try:
+        lesson = Lesson.objects.select_related("module__course").get(id=lesson_id)
+    except Lesson.DoesNotExist:
+        return
+
+    if not lesson.transcript:
+        return
+
+    course_id = lesson.module.course.id
+
+    try:
+        response = requests.post(
+            f"{settings.AI_SERVICE_URL}/embed",
+            json={
+                "lesson_id": lesson.id,
+                "course_id": course_id,
+                "transcript_text": lesson.transcript,
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
+        print(f"Embedded lesson {lesson_id}: {response.json()}")
+
+    except requests.RequestException as e:
+        print(f"Embedding failed for lesson {lesson_id}: {e}")

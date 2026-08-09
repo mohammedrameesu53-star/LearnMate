@@ -100,6 +100,13 @@ class Lesson(models.Model):
         ("assignment", "Assignment"),
     ]
 
+    TRANSCRIPT_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+    ]
+
     module = models.ForeignKey(
         Module,
         on_delete=models.CASCADE,
@@ -135,6 +142,23 @@ class Lesson(models.Model):
     is_preview = models.BooleanField(
         default=False
     )
+
+    transcript = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    transcript_status = models.CharField(
+        max_length=20,
+        choices=TRANSCRIPT_STATUS_CHOICES,
+        default="pending"
+    )
+
+    original_transcript = models.TextField(
+        blank=True,
+        null=True
+    )  # raw transcript in the video's spoken language (e.g. Malayalam)
+       # `transcript` (already added) now specifically holds the ENGLISH version used for embeddings/RAG
 
     created_at = models.DateTimeField(
         auto_now_add=True
