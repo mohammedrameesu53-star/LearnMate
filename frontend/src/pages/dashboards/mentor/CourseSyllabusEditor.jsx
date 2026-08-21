@@ -13,7 +13,7 @@ export default function CourseSyllabusEditor() {
   const [course, setCourse] = useState(null);
   const [modules, setModules] = useState([]);
   const [lessonsMap, setLessonsMap] = useState({}); // moduleId -> array of lessons
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -35,6 +35,8 @@ export default function CourseSyllabusEditor() {
   const [lessonType, setLessonType] = useState("video");
   const [lessonVideoUrl, setLessonVideoUrl] = useState("");
   const [lessonDuration, setLessonDuration] = useState("");
+  const [lessonSourceType, setLessonSourceType] = useState("youtube"); // "youtube" | "upload"
+  const [lessonVideoFile, setLessonVideoFile] = useState(null);
   const [lessonOrder, setLessonOrder] = useState(1);
   const [lessonPreview, setLessonPreview] = useState(false);
 
@@ -187,6 +189,8 @@ export default function CourseSyllabusEditor() {
     setLessonType("video");
     setLessonVideoUrl("");
     setLessonDuration("");
+    setLessonSourceType("youtube");
+    setLessonVideoFile(null);
     setLessonOrder((lessonsMap[moduleId]?.length || 0) + 1);
     setLessonPreview(false);
     setActionError("");
@@ -201,6 +205,8 @@ export default function CourseSyllabusEditor() {
     setLessonDesc(les.description || "");
     setLessonType(les.lesson_type || "video");
     setLessonVideoUrl(les.video_url || "");
+    setLessonSourceType(les.source_type || "youtube");
+    setLessonVideoFile(null); // can't pre-fill a file input; mentor must re-upload to change it
     setLessonDuration(les.duration || "");
     setLessonOrder(les.order || 1);
     setLessonPreview(les.is_preview || false);
@@ -217,22 +223,31 @@ export default function CourseSyllabusEditor() {
     setIsSubmitting(true);
     setActionError("");
 
-    const payload = {
-      module: lessonModuleId,
-      title: lessonTitle,
-      description: lessonDesc,
-      lesson_type: lessonType,
-      video_url: lessonVideoUrl,
-      duration: lessonDuration,
-      order: parseInt(lessonOrder),
-      is_preview: lessonPreview
-    };
+    const formData = new FormData();
+    formData.append("module", lessonModuleId);
+    formData.append("title", lessonTitle);
+    formData.append("description", lessonDesc);
+    formData.append("lesson_type", lessonType);
+    formData.append("duration", lessonDuration);
+    formData.append("order", parseInt(lessonOrder));
+    formData.append("is_preview", lessonPreview);
+    formData.append("source_type", lessonSourceType);
+
+    if (lessonSourceType === "youtube") {
+      formData.append("video_url", lessonVideoUrl);
+    } else if (lessonVideoFile) {
+      formData.append("video_file", lessonVideoFile);
+    }
 
     try {
       if (lessonModalType === "create") {
-        await api.post("/api/courses/lessons/create/", payload);
+        await api.post("/api/courses/lessons/create/", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
       } else {
-        await api.patch(`/api/courses/lessons/${selectedLessonId}/update/`, payload);
+        await api.patch(`/api/courses/lessons/${selectedLessonId}/update/`, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
       }
       setShowLessonModal(false);
       await fetchCourseAndSyllabus();
@@ -272,7 +287,7 @@ export default function CourseSyllabusEditor() {
     <DashboardLayout role="mentor" user={user}>
       <div className="space-y-6 animate-fade-in max-w-4xl mx-auto pb-12">
         {/* Back Link */}
-        <button 
+        <button
           onClick={() => navigate("/mentor/courses")}
           className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 transition cursor-pointer"
         >
@@ -292,7 +307,7 @@ export default function CourseSyllabusEditor() {
             <h2 className="text-2xl font-extrabold text-slate-800">{course?.title}</h2>
             <p className="text-sm text-slate-500 font-medium mt-1">Manage syllabus modules, lectures, and content orders</p>
           </div>
-          <button 
+          <button
             onClick={openModuleCreate}
             className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
           >
@@ -314,34 +329,34 @@ export default function CourseSyllabusEditor() {
               <form onSubmit={handleModuleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Module Title</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={moduleTitle} 
-                    onChange={e => setModuleTitle(e.target.value)} 
-                    placeholder="e.g. Chapter 1: Introduction to Mechanics" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                  <input
+                    type="text"
+                    required
+                    value={moduleTitle}
+                    onChange={e => setModuleTitle(e.target.value)}
+                    placeholder="e.g. Chapter 1: Introduction to Mechanics"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Description</label>
-                  <textarea 
-                    value={moduleDesc} 
-                    onChange={e => setModuleDesc(e.target.value)} 
-                    placeholder="Overview of syllabus subjects..." 
-                    rows="3" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none" 
+                  <textarea
+                    value={moduleDesc}
+                    onChange={e => setModuleDesc(e.target.value)}
+                    placeholder="Overview of syllabus subjects..."
+                    rows="3"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Module Order</label>
-                  <input 
-                    type="number" 
-                    required 
-                    value={moduleOrder} 
-                    onChange={e => setModuleOrder(e.target.value)} 
-                    placeholder="e.g. 1" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                  <input
+                    type="number"
+                    required
+                    value={moduleOrder}
+                    onChange={e => setModuleOrder(e.target.value)}
+                    placeholder="e.g. 1"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                   />
                 </div>
                 <div className="flex gap-2 justify-end mt-6">
@@ -366,31 +381,31 @@ export default function CourseSyllabusEditor() {
               <form onSubmit={handleLessonSubmit} className="space-y-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Lesson Title</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={lessonTitle} 
-                    onChange={e => setLessonTitle(e.target.value)} 
-                    placeholder="e.g. 1.1 Newtonian Motion" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                  <input
+                    type="text"
+                    required
+                    value={lessonTitle}
+                    onChange={e => setLessonTitle(e.target.value)}
+                    placeholder="e.g. 1.1 Newtonian Motion"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Description</label>
-                  <textarea 
-                    value={lessonDesc} 
-                    onChange={e => setLessonDesc(e.target.value)} 
-                    placeholder="Overview of lecture topics..." 
-                    rows="3" 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none" 
+                  <textarea
+                    value={lessonDesc}
+                    onChange={e => setLessonDesc(e.target.value)}
+                    placeholder="Overview of lecture topics..."
+                    rows="3"
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Lesson Type</label>
-                    <select 
-                      value={lessonType} 
-                      onChange={e => setLessonType(e.target.value)} 
+                    <select
+                      value={lessonType}
+                      onChange={e => setLessonType(e.target.value)}
                       className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                     >
                       <option value="video">Video Lecture</option>
@@ -401,44 +416,74 @@ export default function CourseSyllabusEditor() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Duration</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={lessonDuration} 
-                      onChange={e => setLessonDuration(e.target.value)} 
-                      placeholder="e.g. 15 mins" 
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                    <input
+                      type="text"
+                      required
+                      value={lessonDuration}
+                      onChange={e => setLessonDuration(e.target.value)}
+                      placeholder="e.g. 15 mins"
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Video Streaming URL (Optional)</label>
-                  <input 
-                    type="url" 
-                    value={lessonVideoUrl} 
-                    onChange={e => setLessonVideoUrl(e.target.value)} 
-                    placeholder="e.g. https://youtube.com/watch?v=..." 
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
-                  />
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Video Source</label>
+                  <div className="flex gap-4 mb-2">
+                    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                      <input
+                        type="radio"
+                        checked={lessonSourceType === "youtube"}
+                        onChange={() => setLessonSourceType("youtube")}
+                      />
+                      YouTube Link
+                    </label>
+                    <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                      <input
+                        type="radio"
+                        checked={lessonSourceType === "upload"}
+                        onChange={() => setLessonSourceType("upload")}
+                      />
+                      Upload Video
+                    </label>
+                  </div>
+
+                  {lessonSourceType === "youtube" ? (
+                    <input
+                      type="url"
+                      value={lessonVideoUrl}
+                      onChange={e => setLessonVideoUrl(e.target.value)}
+                      placeholder="e.g. https://youtube.com/watch?v=..."
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
+                    />
+                  ) : (
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={e => setLessonVideoFile(e.target.files[0])}
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
+                    />
+                  )}
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Order Index</label>
-                    <input 
-                      type="number" 
-                      required 
-                      value={lessonOrder} 
-                      onChange={e => setLessonOrder(e.target.value)} 
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm" 
+                    <input
+                      type="number"
+                      required
+                      value={lessonOrder}
+                      onChange={e => setLessonOrder(e.target.value)}
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
                     />
                   </div>
                   <div className="flex items-center gap-2 pt-6">
-                    <input 
-                      type="checkbox" 
-                      id="isPreview" 
-                      checked={lessonPreview} 
-                      onChange={e => setLessonPreview(e.target.checked)} 
-                      className="rounded text-indigo-600 focus:ring-indigo-500" 
+                    <input
+                      type="checkbox"
+                      id="isPreview"
+                      checked={lessonPreview}
+                      onChange={e => setLessonPreview(e.target.checked)}
+                      className="rounded text-indigo-600 focus:ring-indigo-500"
                     />
                     <label htmlFor="isPreview" className="text-xs font-bold text-slate-600 cursor-pointer">Preview Lesson</label>
                   </div>
@@ -473,21 +518,21 @@ export default function CourseSyllabusEditor() {
                         <h4 className="text-sm font-bold text-slate-700 mt-0.5">{mod.title}</h4>
                       </div>
                       <div className="flex items-center gap-2.5">
-                        <button 
-                          onClick={() => openLessonCreate(mod.id)} 
+                        <button
+                          onClick={() => openLessonCreate(mod.id)}
                           className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-bold cursor-pointer transition"
                         >
                           Add Lesson
                         </button>
-                        <button 
-                          onClick={() => openModuleEdit(mod)} 
+                        <button
+                          onClick={() => openModuleEdit(mod)}
                           className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer transition"
                           title="Edit module settings"
                         >
                           <Edit2 size={12} />
                         </button>
-                        <button 
-                          onClick={() => handleModuleDelete(mod.id)} 
+                        <button
+                          onClick={() => handleModuleDelete(mod.id)}
                           className="p-1.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer transition"
                           title="Delete module"
                         >
@@ -502,11 +547,11 @@ export default function CourseSyllabusEditor() {
                         <div className="p-4 text-center text-xs text-slate-400 font-medium">No lessons added to this module.</div>
                       ) : (
                         lessons.map((les) => (
-                          <div 
-                            key={les.id} 
+                          <div
+                            key={les.id}
                             className="px-6 py-4 flex justify-between items-center hover:bg-slate-50/40 transition group"
                           >
-                            <div 
+                            <div
                               onClick={() => handleOpenPreview(les)}
                               className="flex items-center gap-3.5 min-w-0 cursor-pointer flex-1"
                             >
@@ -520,17 +565,17 @@ export default function CourseSyllabusEditor() {
                                 </p>
                               </div>
                             </div>
-                            
+
                             <div className="flex gap-2">
-                              <button 
-                                onClick={() => openLessonEdit(les, mod.id)} 
+                              <button
+                                onClick={() => openLessonEdit(les, mod.id)}
                                 className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer transition"
                                 title="Edit lesson"
                               >
                                 <Edit2 size={12} />
                               </button>
-                              <button 
-                                onClick={() => handleLessonDelete(les.id)} 
+                              <button
+                                onClick={() => handleLessonDelete(les.id)}
                                 className="p-1.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer transition"
                                 title="Delete lesson"
                               >
@@ -561,8 +606,8 @@ export default function CourseSyllabusEditor() {
                 <h3 className="text-lg font-bold text-slate-800 mt-2">{previewLesson.title}</h3>
                 <p className="text-xs text-slate-400 font-semibold mt-0.5">Duration: {previewLesson.duration || "N/A"}</p>
               </div>
-              <button 
-                onClick={() => setPreviewLesson(null)} 
+              <button
+                onClick={() => setPreviewLesson(null)}
                 className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold cursor-pointer"
               >
                 Close Preview
@@ -570,11 +615,17 @@ export default function CourseSyllabusEditor() {
             </div>
 
             {/* Video Player */}
-            {previewLesson.video_url && (
+            {(previewLesson.video_url || previewLesson.video_file) && (
               <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-sm bg-slate-900 border border-slate-200/50">
-                {getEmbedUrl(previewLesson.video_url) ? (
-                  <iframe 
-                    src={getEmbedUrl(previewLesson.video_url)} 
+                {previewLesson.source_type === "upload" && previewLesson.video_file ? (
+                  <video
+                    src={previewLesson.video_file}
+                    controls
+                    className="w-full h-full"
+                  />
+                ) : getEmbedUrl(previewLesson.video_url) ? (
+                  <iframe
+                    src={getEmbedUrl(previewLesson.video_url)}
                     title={previewLesson.title}
                     className="w-full h-full border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -585,7 +636,6 @@ export default function CourseSyllabusEditor() {
                 )}
               </div>
             )}
-
             {/* Description */}
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Description</h4>
@@ -606,8 +656,8 @@ export default function CourseSyllabusEditor() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {previewResources.map((res) => {
-                    const downloadUrl = res.file 
-                      ? `http://127.0.0.1:8000${res.file}` 
+                    const downloadUrl = res.file
+                      ? `http://127.0.0.1:8000${res.file}`
                       : res.external_url;
 
                     return (
@@ -617,9 +667,9 @@ export default function CourseSyllabusEditor() {
                           <span className="text-xs font-bold text-slate-700 truncate">{res.title}</span>
                         </div>
                         {downloadUrl && (
-                          <a 
-                            href={downloadUrl} 
-                            target="_blank" 
+                          <a
+                            href={downloadUrl}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="px-2 py-1 rounded bg-slate-50 hover:bg-indigo-50 text-[10px] font-bold text-indigo-600 transition"
                           >

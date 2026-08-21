@@ -49,24 +49,24 @@ export default function AdminDashboardOverview() {
     <DashboardLayout role="admin" user={user}>
       <div className="space-y-8 animate-fade-in">
         {/* Header section with Operational Status */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm transition-colors duration-200">
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Platform Dashboard</h2>
-            <p className="text-slate-500 font-medium text-sm mt-1">
+            <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Platform Dashboard</h2>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">
               Real-time overview of LearnMate registrations, course distributions, and student streaks.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200/60 px-4 py-2 rounded-xl">
+          <div className="flex items-center gap-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-4 py-2 rounded-xl">
             <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping"></span>
-            <span className="text-xs font-bold text-emerald-700">Platform Systems Live</span>
-            <span className="text-[10px] text-slate-400 font-medium ml-1">Updated just now</span>
+            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Platform Systems Live</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium ml-1">Updated just now</span>
           </div>
         </div>
 
         {/* Error Notification */}
         {error && (
-          <div className="bg-rose-50 text-rose-600 border border-rose-100 px-4 py-3 rounded-xl text-xs font-semibold flex justify-between items-center">
+          <div className="bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/60 px-4 py-3 rounded-xl text-xs font-semibold flex justify-between items-center">
             <span className="flex items-center gap-2">
               <AlertCircle size={16} />
               {error}
@@ -83,13 +83,13 @@ export default function AdminDashboardOverview() {
             { label: "Catalog Courses", count: stats.total_courses ?? 0, desc: `(${stats.published_courses || 0} Published / ${stats.draft_courses || 0} Draft)`, color: "text-emerald-600 bg-emerald-50", icon: BookOpen },
             { label: "Active Enrollments", count: stats.total_enrollments ?? 0, desc: `${stats.completed_courses || 0} fully completed`, color: "text-amber-600 bg-amber-50", icon: Landmark }
           ].map((stat, i) => (
-            <div key={i} className="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-sm relative overflow-hidden">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{stat.label}</span>
+            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-6 rounded-3xl shadow-sm relative overflow-hidden transition-colors duration-200">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">{stat.label}</span>
               <div className="flex justify-between items-end mt-2">
-                <h3 className="text-2xl font-black text-slate-800 leading-none">{stat.count}</h3>
+                <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 leading-none">{stat.count}</h3>
               </div>
-              <div className="mt-4 flex gap-1 items-center text-[10px] font-bold text-slate-400 uppercase">
-                <stat.icon size={12} className="text-slate-400" />
+              <div className="mt-4 flex gap-1 items-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
+                <stat.icon size={12} className="text-slate-400 dark:text-slate-500" />
                 <span>{stat.desc}</span>
               </div>
             </div>
@@ -119,19 +119,19 @@ export default function AdminDashboardOverview() {
           </div>
 
           {/* syllabus stats */}
-          <div className="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-sm flex flex-col justify-between">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-6 rounded-3xl shadow-sm flex flex-col justify-between transition-colors duration-200">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Syllabus Breakdown</span>
-              <h4 className="text-2xl font-black text-slate-800 mt-2">{stats.total_lessons ?? 0} Lessons</h4>
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Syllabus Breakdown</span>
+              <h4 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2">{stats.total_lessons ?? 0} Lessons</h4>
             </div>
-            <div className="mt-4 flex gap-4 text-xs font-semibold text-slate-500 border-t border-slate-50 pt-4">
+            <div className="mt-4 flex gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 border-t border-slate-50 dark:border-slate-800 pt-4">
               <div>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Total Modules</span>
-                <p className="text-base font-bold text-slate-700 mt-0.5">{stats.total_modules || 0}</p>
+                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">Total Modules</span>
+                <p className="text-base font-bold text-slate-700 dark:text-slate-200 mt-0.5">{stats.total_modules || 0}</p>
               </div>
               <div>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Average per Module</span>
-                <p className="text-base font-bold text-slate-700 mt-0.5">
+                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block">Average per Module</span>
+                <p className="text-base font-bold text-slate-700 dark:text-slate-200 mt-0.5">
                   {stats.total_modules ? Math.round(stats.total_lessons / stats.total_modules) : 0}
                 </p>
               </div>
@@ -139,10 +139,10 @@ export default function AdminDashboardOverview() {
           </div>
 
           {/* AI server node status */}
-          <div className="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-sm space-y-4 self-start w-full">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-6 rounded-3xl shadow-sm space-y-4 self-start w-full transition-colors duration-200">
             <div className="flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">Operational Nodes</h3>
-              <Cpu size={16} className="text-indigo-600 animate-pulse" />
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Operational Nodes</h3>
+              <Cpu size={16} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
             </div>
 
             <div className="space-y-3">
@@ -151,12 +151,12 @@ export default function AdminDashboardOverview() {
                 { name: "SMTP Service", val: "Online", type: "Active" },
                 { name: "Celery Worker Queue", val: "Online", type: "Active" }
               ].map((node, i) => (
-                <div key={i} className="flex justify-between items-center border border-slate-50 p-2 rounded-xl text-xs font-semibold">
+                <div key={i} className="flex justify-between items-center border border-slate-50 dark:border-slate-800 p-2 rounded-xl text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span className="text-slate-700">{node.name}</span>
+                    <span className="text-slate-700 dark:text-slate-200">{node.name}</span>
                   </div>
-                  <span className="text-slate-500 font-bold">{node.val}</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-bold">{node.val}</span>
                 </div>
               ))}
             </div>
@@ -164,37 +164,37 @@ export default function AdminDashboardOverview() {
         </div>
 
         {/* Recently Created Courses Table */}
-        <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm overflow-hidden transition-colors duration-200">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">Recently Created Courses</h3>
-            <p className="text-xs text-slate-400 font-medium">Platform-wide additions audit trails</p>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Recently Created Courses</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Platform-wide additions audit trails</p>
           </div>
 
           <div className="overflow-x-auto mt-6">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   <th className="pb-3">Course Title</th>
                   <th className="pb-3">Status</th>
                   <th className="pb-3">Creation Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
                 {latestCourses.length === 0 ? (
                   <tr>
-                    <td colSpan="3" className="py-4 text-center text-slate-400 font-medium">No courses created yet.</td>
+                    <td colSpan="3" className="py-4 text-center text-slate-400 dark:text-slate-500 font-medium">No courses created yet.</td>
                   </tr>
                 ) : (
                   latestCourses.map((c) => (
                     <tr key={c.id}>
-                      <td className="py-4 text-slate-800">{c.title}</td>
+                      <td className="py-4 text-slate-800 dark:text-slate-200">{c.title}</td>
                       <td className="py-4">
                         <span className={`px-2 py-0.5 text-[9px] font-bold rounded border
-                          ${c.status === 'published' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                          ${c.status === 'published' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/60' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>
                           {c.status?.toUpperCase()}
                         </span>
                       </td>
-                      <td className="py-4 text-slate-400 font-medium">{new Date(c.created_at).toLocaleDateString()}</td>
+                      <td className="py-4 text-slate-400 dark:text-slate-500 font-medium">{new Date(c.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))
                 )}

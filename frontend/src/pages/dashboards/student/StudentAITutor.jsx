@@ -136,16 +136,16 @@ export default function StudentAITutor() {
 
   return (
     <DashboardLayout role="student" user={user}>
-      <div className="h-[calc(100vh-12rem)] flex flex-col bg-white border border-slate-200/60 rounded-3xl shadow-sm overflow-hidden animate-fade-in">
+      <div className="h-[calc(100vh-12rem)] flex flex-col bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden animate-fade-in transition-colors duration-200">
         {/* AI Tutor Chat Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
               <Bot size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-800">LearnMate AI Tutor</h3>
-              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">LearnMate AI Tutor</h3>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
                 <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span>
                 Active & Listening
               </span>
@@ -153,22 +153,22 @@ export default function StudentAITutor() {
           </div>
           <button
             onClick={handleClearHistory}
-            className="text-xs text-rose-600 hover:text-rose-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+            className="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-semibold px-3 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
           >
             Clear History
           </button>
         </div>
 
         {/* Chat History Panel */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/20">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/20 dark:bg-slate-950/30">
           {chatMessages.map((msg, i) => (
             <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none shadow-md shadow-indigo-100' : 'bg-white border border-slate-200/80 text-slate-800 rounded-bl-none shadow-sm'}`}>
+              <div className={`max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 rounded-bl-none shadow-sm'}`}>
                 {msg.loading ? (
                   <div className="flex items-center gap-1.5 py-1">
-                    <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="h-2 w-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    <span className="h-2 w-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="h-2 w-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="h-2 w-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                   </div>
                 ) : (
                   <ReactMarkdown
@@ -177,8 +177,8 @@ export default function StudentAITutor() {
                       ul: ({ children }) => <ul className="list-disc ml-5 mb-2">{children}</ul>,
                       ol: ({ children }) => <ol className="list-decimal ml-5 mb-2">{children}</ol>,
                       li: ({ children }) => <li className="mb-1">{children}</li>,
-                      code: ({ children }) => <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-xs">{children}</code>,
-                      pre: ({ children }) => <pre className="bg-slate-100 p-3 rounded-lg overflow-x-auto my-2 font-mono text-xs">{children}</pre>
+                      code: ({ children }) => <code className="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-1.5 py-0.5 rounded font-mono text-xs">{children}</code>,
+                      pre: ({ children }) => <pre className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg overflow-x-auto my-2 font-mono text-xs">{children}</pre>
                     }}
                   >
                     {msg.text}
@@ -192,13 +192,13 @@ export default function StudentAITutor() {
         </div>
 
         {/* Chat Input Console */}
-        <form onSubmit={handleSendChat} className="p-4 border-t border-slate-100 bg-white flex gap-3">
+        <form onSubmit={handleSendChat} className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3">
           <input
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             placeholder="Ask your AI Tutor about relativity, quantum mechanics..."
-            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
           />
           <button type="submit" className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition cursor-pointer flex items-center gap-2">
             <span>Send</span>

@@ -220,3 +220,5 @@ class AdminCourseStatisticsAPIView(APIView):
             statistics,
             status=status.HTTP_200_OK
         )
+
+# apps.adiminpanel.views.courses.py

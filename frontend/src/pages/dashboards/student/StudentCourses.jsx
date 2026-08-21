@@ -114,34 +114,34 @@ export default function StudentCourses() {
         {/* 1. Enrolled Courses Section */}
         <div>
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-800">Your Enrolled Courses</h2>
-            <p className="text-sm text-slate-500 font-medium">Select a course to view chapters, lessons, and learning material</p>
+            <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Your Enrolled Courses</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Select a course to view chapters, lessons, and learning material</p>
           </div>
 
           {enrolledCourses.length === 0 ? (
-            <div className="bg-white border border-slate-200/60 rounded-3xl p-12 text-center mt-6">
-              <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-slate-700">No Courses Enrolled Yet</h3>
-              <p className="text-xs text-slate-400 mt-1">Select an option from the catalog below to start learning.</p>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-12 text-center mt-6">
+              <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No Courses Enrolled Yet</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Select an option from the catalog below to start learning.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
               {enrolledCourses.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                  className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-extrabold tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-md uppercase">
+                      <span className="text-[9px] font-extrabold tracking-wider bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60 px-2.5 py-1 rounded-md uppercase">
                         Active
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-slate-800 mt-3 leading-snug line-clamp-2">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-3 leading-snug line-clamp-2">
                       {c.course_title}
                     </h3>
-                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">
                       Enrolled: {new Date(c.enrolled_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -149,16 +149,16 @@ export default function StudentCourses() {
                   <div className="mt-6 space-y-4">
                     {/* Progress Indicator */}
                     <div>
-                      <div className="flex justify-between items-center text-xs font-semibold text-slate-500 mb-1.5">
+                      <div className="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           Course Progress
                         </span>
-                        <span className="text-indigo-600 font-bold">{c.progress}%</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-bold">{c.progress}%</span>
                       </div>
-                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                         <div
-                          className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                          className="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full transition-all duration-500"
                           style={{ width: `${c.progress}%` }}
                         ></div>
                       </div>
@@ -167,7 +167,7 @@ export default function StudentCourses() {
                     {/* Route Button to Course Viewer Workspace */}
                     <button
                       onClick={() => navigate(`/student/courses/${c.course}`)}
-                      className="w-full py-2.5 px-4 rounded-xl border border-indigo-100 bg-indigo-50/50 hover:bg-indigo-600 hover:text-white text-indigo-600 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 group"
+                      className="w-full py-2.5 px-4 rounded-xl border border-indigo-100 dark:border-indigo-800/60 bg-indigo-50/50 dark:bg-indigo-950/50 hover:bg-indigo-600 dark:hover:bg-indigo-600 hover:text-white dark:hover:text-white text-indigo-600 dark:text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 group"
                     >
                       <span>Enter Course Room</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -180,38 +180,38 @@ export default function StudentCourses() {
         </div>
 
         {/* 2. Available Catalog Section */}
-        <div className="border-t border-slate-200/60 pt-10">
+        <div className="border-t border-slate-200/60 dark:border-slate-800 pt-10">
           <div>
-            <h2 className="text-xl font-extrabold text-slate-800">Course Catalog</h2>
-            <p className="text-sm text-slate-500 font-medium">Browse published courses and expand your learning horizons</p>
+            <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Course Catalog</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Browse published courses and expand your learning horizons</p>
           </div>
 
           {availableCourses.length === 0 ? (
-            <div className="bg-white border border-slate-200/60 rounded-3xl p-8 text-center mt-6">
-              <BookCheck className="w-10 h-10 text-indigo-600 mx-auto mb-3" />
-              <p className="text-xs text-slate-400 font-medium">You have enrolled in all available courses on the platform!</p>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-8 text-center mt-6">
+              <BookCheck className="w-10 h-10 text-indigo-600 dark:text-indigo-400 mx-auto mb-3" />
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">You have enrolled in all available courses on the platform!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
               {availableCourses.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm flex flex-col justify-between"
+                  className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-extrabold tracking-wider bg-slate-50 text-slate-500 border border-slate-200 px-2.5 py-1 rounded-md uppercase">
+                      <span className="text-[9px] font-extrabold tracking-wider bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-md uppercase">
                         {c.level || "Beginner"}
                       </span>
-                      <span className="text-[10px] font-semibold text-slate-400">
+                      <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
                         {c.duration}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-slate-800 mt-3 leading-snug line-clamp-2">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-3 leading-snug line-clamp-2">
                       {c.title}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-2 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 leading-relaxed line-clamp-3">
                       {c.description || "No description provided."}
                     </p>
                   </div>

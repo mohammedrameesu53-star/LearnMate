@@ -62,65 +62,65 @@ export default function AdminReports() {
                 )}
 
                 <div>
-                    <h2 className="text-2xl font-extrabold text-slate-800">Platform Reports</h2>
-                    <p className="text-sm text-slate-500 font-medium">Enrollment trends, recent activity, and top-performing courses</p>
+                    <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Platform Reports</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Enrollment trends, recent activity, and top-performing courses</p>
                 </div>
 
                 {/* Enrollment stat strip */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div className="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-6 rounded-3xl shadow-sm transition-colors duration-200">
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Enrollments</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Enrollments</span>
                             <Landmark size={16} className="text-indigo-400" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-800 mt-2">{reports?.total_enrollments ?? 0}</h3>
+                        <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 mt-2">{reports?.total_enrollments ?? 0}</h3>
                     </div>
-                    <div className="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-6 rounded-3xl shadow-sm transition-colors duration-200">
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Completed</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Completed</span>
                             <CheckCircle2 size={16} className="text-emerald-400" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-800 mt-2">{reports?.completed_enrollments ?? 0}</h3>
+                        <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 mt-2">{reports?.completed_enrollments ?? 0}</h3>
                     </div>
-                    <div className="bg-white border border-slate-200/60 p-6 rounded-3xl shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-6 rounded-3xl shadow-sm transition-colors duration-200">
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active</span>
+                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active</span>
                             <Activity size={16} className="text-amber-400" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-800 mt-2">{reports?.active_enrollments ?? 0}</h3>
+                        <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 mt-2">{reports?.active_enrollments ?? 0}</h3>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Recent Users */}
-                    <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm transition-colors duration-200">
                         <div className="flex items-center gap-2 mb-4">
-                            <Users size={16} className="text-indigo-600" />
-                            <h3 className="text-sm font-bold text-slate-800">Recent Users</h3>
+                            <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Recent Users</h3>
                         </div>
                         {recentUsers.length === 0 ? (
-                            <p className="text-xs text-slate-400 py-4 text-center">No recent registrations.</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">No recent registrations.</p>
                         ) : (
                             <div className="space-y-1">
                                 {recentUsers.map((u) => (
-                                    <div key={u.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
+                                    <div key={u.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 dark:border-slate-800 last:border-0">
                                         <div className="flex items-center gap-3 min-w-0">
-                                            <div className="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                                                 <UserIcon size={14} />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-xs font-bold text-slate-700 truncate">{u.name}</p>
-                                                <p className="text-[10px] text-slate-400 truncate">{u.email}</p>
+                                                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{u.name}</p>
+                                                <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{u.email}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className={`px-2 py-0.5 text-[9px] font-bold rounded uppercase
-                        ${u.role === "admin" ? "bg-indigo-50 text-indigo-600" :
-                                                    u.role === "mentor" ? "bg-purple-50 text-purple-600" :
-                                                        "bg-slate-50 text-slate-600"}`}>
+                        ${u.role === "admin" ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400" :
+                                                    u.role === "mentor" ? "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400" :
+                                                        "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}>
                                                 {u.role}
                                             </span>
-                                            <span className="text-[10px] text-slate-400 font-medium">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                                                 {new Date(u.created_at).toLocaleDateString()}
                                             </span>
                                         </div>
@@ -131,29 +131,29 @@ export default function AdminReports() {
                     </div>
 
                     {/* Recent Courses */}
-                    <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm transition-colors duration-200">
                         <div className="flex items-center gap-2 mb-4">
-                            <BookOpen size={16} className="text-indigo-600" />
-                            <h3 className="text-sm font-bold text-slate-800">Recent Courses</h3>
+                            <BookOpen size={16} className="text-indigo-600 dark:text-indigo-400" />
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Recent Courses</h3>
                         </div>
                         {recentCourses.length === 0 ? (
-                            <p className="text-xs text-slate-400 py-4 text-center">No recent course activity.</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">No recent course activity.</p>
                         ) : (
                             <div className="space-y-1">
                                 {recentCourses.map((c) => (
-                                    <div key={c.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
+                                    <div key={c.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 dark:border-slate-800 last:border-0">
                                         <div className="min-w-0">
-                                            <p className="text-xs font-bold text-slate-700 truncate">{c.title}</p>
-                                            <p className="text-[10px] text-slate-400 truncate">by {c.mentor?.name}</p>
+                                            <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{c.title}</p>
+                                            <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">by {c.mentor?.name}</p>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className={`px-2 py-0.5 text-[9px] font-bold rounded border uppercase
                         ${c.status === "published"
-                                                    ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                                                    : "bg-amber-50 text-amber-600 border-amber-100"}`}>
+                                                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/60"
+                                                    : "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/60"}`}>
                                                 {c.status}
                                             </span>
-                                            <span className="text-[10px] text-slate-400 font-medium">
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                                                 {new Date(c.created_at).toLocaleDateString()}
                                             </span>
                                         </div>
@@ -165,37 +165,37 @@ export default function AdminReports() {
                 </div>
 
                 {/* Top Courses */}
-                <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm transition-colors duration-200">
                     <div className="flex items-center gap-2 mb-4">
                         <Trophy size={16} className="text-amber-500" />
-                        <h3 className="text-sm font-bold text-slate-800">Top Courses by Enrollment</h3>
+                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Top Courses by Enrollment</h3>
                     </div>
                     {topCourses.length === 0 ? (
-                        <p className="text-xs text-slate-400 py-4 text-center">No enrollment data yet.</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 py-4 text-center">No enrollment data yet.</p>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                         <th className="pb-3 w-12">Rank</th>
                                         <th className="pb-3">Course Title</th>
                                         <th className="pb-3 text-right">Students Enrolled</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     {topCourses.map((c, i) => (
                                         <tr key={c.id}>
                                             <td className="py-3">
                                                 <span className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-black
-                          ${i === 0 ? "bg-amber-100 text-amber-700" :
-                                                        i === 1 ? "bg-slate-200 text-slate-600" :
-                                                            i === 2 ? "bg-orange-100 text-orange-700" :
-                                                                "bg-slate-50 text-slate-400"}`}>
+                          ${i === 0 ? "bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400" :
+                                                        i === 1 ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300" :
+                                                            i === 2 ? "bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-400" :
+                                                                "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500"}`}>
                                                     {i + 1}
                                                 </span>
                                             </td>
-                                            <td className="py-3">{c.title}</td>
-                                            <td className="py-3 text-right flex items-center justify-end gap-1.5 text-indigo-600">
+                                            <td className="py-3 text-slate-800 dark:text-slate-200">{c.title}</td>
+                                            <td className="py-3 text-right flex items-center justify-end gap-1.5 text-indigo-600 dark:text-indigo-400">
                                                 <TrendingUp size={13} />
                                                 {c.students}
                                             </td>

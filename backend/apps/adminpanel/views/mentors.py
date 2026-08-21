@@ -142,3 +142,5 @@ class AdminMentorDeleteAPIView(APIView):
             },
             status=status.HTTP_204_NO_CONTENT
         )        
+
+# apps.adminpanel.views.py 

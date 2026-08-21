@@ -171,13 +171,13 @@ export default function GroupChatComponent() {
   return (
     <div
       style={{ height: 'calc(100vh - 12rem)', minHeight: '450px' }}
-      className="grid grid-cols-1 md:grid-cols-3 bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden select-none relative"
+      className="grid grid-cols-1 md:grid-cols-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden select-none relative transition-colors duration-200"
     >
       {/* Groups Sidebar */}
-      <div className="border-r border-slate-200 flex flex-col h-full bg-slate-50/10 overflow-hidden">
-        <div className="p-4 border-b border-slate-200/80 space-y-3">
+      <div className="border-r border-slate-200 dark:border-slate-800 flex flex-col h-full bg-slate-50/10 dark:bg-slate-900/50 overflow-hidden">
+        <div className="p-4 border-b border-slate-200/80 dark:border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-800">Cohort Groups</h3>
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Cohort Groups</h3>
             {user?.role === 'mentor' && (
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -190,13 +190,13 @@ export default function GroupChatComponent() {
           </div>
           {/* Search bar */}
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={14} />
             <input
               type="text"
               placeholder="Search groups..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-500 bg-white transition"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition"
             />
           </div>
         </div>
@@ -206,12 +206,12 @@ export default function GroupChatComponent() {
           {isLoadingGroups ? (
             <div className="flex items-center justify-center p-8 gap-2">
               <Loader2 className="h-4 w-4 text-indigo-600 animate-spin" />
-              <span className="text-xs text-slate-400 font-medium">Loading groups...</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Loading groups...</span>
             </div>
           ) : filteredGroups.length === 0 ? (
             <div className="text-center p-8 space-y-2">
-              <Users className="mx-auto text-slate-300" size={24} />
-              <p className="text-xs text-slate-400 font-medium">No cohort groups found</p>
+              <Users className="mx-auto text-slate-300 dark:text-slate-600" size={24} />
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">No cohort groups found</p>
             </div>
           ) : (
             filteredGroups.map((group) => {
@@ -222,18 +222,18 @@ export default function GroupChatComponent() {
                   onClick={() => setActiveGroup(group)}
                   className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left cursor-pointer transition-all duration-200 ${
                     isSelected
-                      ? 'bg-indigo-50/80 text-indigo-600 border border-indigo-100/60 shadow-sm'
-                      : 'hover:bg-slate-50 border border-transparent text-slate-600'
+                      ? 'bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100/60 dark:border-indigo-800/60 shadow-sm'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 border border-transparent text-slate-600 dark:text-slate-300'
                   }`}
                 >
-                  <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs select-none">
+                  <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs select-none">
                     {getGroupInitials(group.name)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-bold text-slate-700 truncate capitalize">
+                    <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate capitalize">
                       {group.name}
                     </h4>
-                    <span className="text-[9px] text-slate-400 font-medium uppercase tracking-wider block mt-0.5">
+                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider block mt-0.5">
                       {new Date(group.created_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -245,25 +245,25 @@ export default function GroupChatComponent() {
       </div>
 
       {/* Message Timeline Area */}
-      <div className="md:col-span-2 flex flex-col justify-between h-full bg-slate-50/20 overflow-hidden">
+      <div className="md:col-span-2 flex flex-col justify-between h-full bg-slate-50/20 dark:bg-slate-950/40 overflow-hidden">
         {activeGroup ? (
           <>
             {/* Header bar */}
-            <div className="px-6 py-4 border-b border-slate-200/80 bg-white flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-indigo-100/60 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                <div className="h-10 w-10 rounded-xl bg-indigo-100/60 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
                   {getGroupInitials(activeGroup.name)}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 capitalize">
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize">
                     {activeGroup.name}
                   </h3>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider">
                     Group Room Chat
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400">
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500">
                 <Users size={12} />
                 <span>Cohort View</span>
               </div>
@@ -276,9 +276,9 @@ export default function GroupChatComponent() {
                   <Loader2 className="h-6 w-6 text-indigo-600 animate-spin" />
                 </div>
               ) : messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
-                  <MessageSquare size={32} className="stroke-1" />
-                  <p className="text-xs font-semibold">Welcome to the Cohort! Send a message to start.</p>
+                <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 space-y-2">
+                  <MessageSquare size={32} className="stroke-1 text-slate-300 dark:text-slate-600" />
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Welcome to the Cohort! Send a message to start.</p>
                 </div>
               ) : (
                 messages.map((msg) => {
@@ -296,12 +296,12 @@ export default function GroupChatComponent() {
                           className={`p-3.5 rounded-2xl text-xs leading-normal font-medium shadow-sm border ${
                             isMe
                               ? 'bg-indigo-600 text-white border-indigo-700 rounded-tr-none'
-                              : 'bg-white text-slate-800 border-slate-200/80 rounded-tl-none'
+                              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200/80 dark:border-slate-700/80 rounded-tl-none'
                           }`}
                         >
                           {msg.message}
                         </div>
-                        <span className={`text-[9px] text-slate-400 font-semibold px-1 ${isMe ? 'text-right' : 'text-left'}`}>
+                        <span className={`text-[9px] text-slate-400 dark:text-slate-500 font-semibold px-1 ${isMe ? 'text-right' : 'text-left'}`}>
                           {isMe ? 'You' : `${senderName} (${senderRole})`}
                           {msg.created_at ? ` • ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
                         </span>
@@ -314,38 +314,38 @@ export default function GroupChatComponent() {
             </div>
 
             {/* Message input */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-200/80 bg-white flex gap-3 items-center">
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 items-center">
               <input
                 type="text"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 placeholder={`Message in #${activeGroup.name.toLowerCase()}...`}
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-xs outline-none focus:border-indigo-500 bg-slate-50/50 hover:bg-slate-50 focus:bg-white transition"
+                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs outline-none focus:border-indigo-500 bg-slate-50/50 dark:bg-slate-800/50 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 transition"
               />
               <button
                 type="submit"
                 disabled={!messageInput.trim()}
-                className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-100 flex items-center justify-center"
+                className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-100 dark:shadow-none flex items-center justify-center"
               >
                 <Send size={14} />
               </button>
             </form>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 space-y-4 p-8 text-center">
-            <div className="h-16 w-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center shadow-inner">
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 space-y-4 p-8 text-center">
+            <div className="h-16 w-16 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-3xl flex items-center justify-center shadow-inner">
               <Users size={28} />
             </div>
             <div className="max-w-xs space-y-1">
-              <h3 className="text-sm font-bold text-slate-800">No Cohort Selected</h3>
-              <p className="text-xs text-slate-400 font-medium">Select one of your cohort channels from the sidebar list to see the timeline.</p>
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No Cohort Selected</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Select one of your cohort channels from the sidebar list to see the timeline.</p>
             </div>
           </div>
         )}
 
         {/* Global Connection / Error Popover */}
         {error && (
-          <div className="absolute bottom-4 right-4 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-lg max-w-sm animate-fade-in">
+          <div className="absolute bottom-4 right-4 bg-rose-50 dark:bg-rose-950 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-lg max-w-sm animate-fade-in">
             <AlertCircle size={16} className="text-rose-500 shrink-0" />
             <span className="text-[11px] font-semibold flex-1 leading-snug">{error}</span>
             <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-600 text-xs font-bold font-mono">×</button>
@@ -355,30 +355,30 @@ export default function GroupChatComponent() {
 
       {/* Modal View for Creating a Cohort Group */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 shadow-xl w-full max-w-md border border-slate-100 mx-4 space-y-4">
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl w-full max-w-md border border-slate-100 dark:border-slate-800 mx-4 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800">Create New Cohort Group</h3>
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Create New Cohort Group</h3>
               <button
                 onClick={() => {
                   setIsModalOpen(false);
                   setNewGroupName('');
                 }}
-                className="text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
               >
                 <X size={16} />
               </button>
             </div>
             <form onSubmit={handleCreateGroup} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-500 uppercase">Group Name / Batch Title</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Group Name / Batch Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Batch A, Physics 101 Cohort"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
@@ -388,7 +388,7 @@ export default function GroupChatComponent() {
                     setIsModalOpen(false);
                     setNewGroupName('');
                   }}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-semibold cursor-pointer transition"
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-semibold cursor-pointer transition"
                 >
                   Cancel
                 </button>

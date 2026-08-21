@@ -122,9 +122,9 @@ export default function StudentDashboardOverview() {
         )}
 
         {/* Greeting Header */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
-          <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">Hello, {user?.name || "Student"}</h2>
-          <p className="text-slate-500 font-medium text-sm mt-1">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm transition-colors duration-200">
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">Hello, {user?.name || "Student"}</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">
             Welcome back to your workspace. Continue studying your enrolled courses or browse recommended topics below.
           </p>
         </div>
@@ -133,14 +133,14 @@ export default function StudentDashboardOverview() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Progress Card */}
           {currentCourseProgress ? (
-            <div className="lg:col-span-2 bg-white border border-slate-200/60 p-8 rounded-3xl shadow-sm flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-50/40 rounded-full blur-3xl -z-10"></div>
+            <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-8 rounded-3xl shadow-sm flex flex-col justify-between relative overflow-hidden transition-colors duration-200">
+              <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-50/40 dark:bg-indigo-950/40 rounded-full blur-3xl -z-10"></div>
               <div>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800/60 px-3 py-1 rounded-full">
                   Primary Course
                 </span>
-                <h3 className="text-xl font-extrabold text-slate-800 mt-4">{currentCourseProgress.title}</h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed mt-2 max-w-lg">
+                <h3 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 mt-4">{currentCourseProgress.title}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mt-2 max-w-lg">
                   {currentCourseProgress.description}
                 </p>
               </div>
@@ -150,22 +150,22 @@ export default function StudentDashboardOverview() {
                 {/* Circular SVG Progress */}
                 <div className="relative h-28 w-28 shrink-0 flex items-center justify-center">
                   <svg className="h-full w-full transform -rotate-90">
-                    <circle cx="56" cy="56" r="48" stroke="#f1f5f9" strokeWidth="10" fill="transparent" />
+                    <circle cx="56" cy="56" r="48" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="10" fill="transparent" />
                     <circle cx="56" cy="56" r="48" stroke="#4f46e5" strokeWidth="10" fill="transparent"
                       strokeDasharray={301.6} strokeDashoffset={301.6 * (1 - (currentCourseProgress.progress ?? 0) / 100)} strokeLinecap="round"
                       className="transition-all duration-1000"
                     />
                   </svg>
                   <div className="absolute text-center">
-                    <p className="text-xl font-black text-slate-800 leading-none">{currentCourseProgress.progress}%</p>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Complete</span>
+                    <p className="text-xl font-black text-slate-800 dark:text-slate-100 leading-none">{currentCourseProgress.progress}%</p>
+                    <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 block">Complete</span>
                   </div>
                 </div>
 
                 <div className="space-y-3 w-full">
                   <button 
                     onClick={() => navigate(`/student/courses/${currentCourseProgress.id}/continue`)}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-100 transition duration-200 cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-100 dark:shadow-none transition duration-200 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <span>Resume Lesson</span>
                     <ChevronRight size={16} />
@@ -174,11 +174,11 @@ export default function StudentDashboardOverview() {
               </div>
             </div>
           ) : (
-            <div className="lg:col-span-2 bg-white border border-slate-200/60 p-8 rounded-3xl shadow-sm flex flex-col justify-center items-center text-center relative overflow-hidden min-h-[250px]">
-              <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-50/40 rounded-full blur-3xl -z-10"></div>
-              <BookOpen size={40} className="text-indigo-600 mb-4 bg-indigo-50 p-2.5 rounded-2xl h-14 w-14 border border-indigo-100" />
-              <h3 className="text-lg font-bold text-slate-800">No Active Course</h3>
-              <p className="text-sm text-slate-500 mt-2 max-w-sm">
+            <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-8 rounded-3xl shadow-sm flex flex-col justify-center items-center text-center relative overflow-hidden min-h-[250px] transition-colors duration-200">
+              <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-50/40 dark:bg-indigo-950/40 rounded-full blur-3xl -z-10"></div>
+              <BookOpen size={40} className="text-indigo-600 dark:text-indigo-400 mb-4 bg-indigo-50 dark:bg-indigo-950/60 p-2.5 rounded-2xl h-14 w-14 border border-indigo-100 dark:border-indigo-800/60" />
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No Active Course</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-sm">
                 You are not currently enrolled in any active course. Browse our recommendations below to get started!
               </p>
             </div>
@@ -227,27 +227,27 @@ export default function StudentDashboardOverview() {
 
         {/* Enrolled Courses Overview */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-slate-800">Your Enrolled Courses</h3>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Your Enrolled Courses</h3>
           {enrolledCourses.length === 0 ? (
-            <div className="bg-white border border-slate-200/60 rounded-2xl p-6 text-center">
-              <p className="text-slate-500 text-xs font-semibold">You are not enrolled in any courses yet.</p>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 text-center">
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold">You are not enrolled in any courses yet.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {enrolledCourses.map((c) => (
-                <div key={c.id} className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm hover:shadow-md transition flex items-center justify-between group">
+                <div key={c.id} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 rounded-2xl shadow-sm hover:shadow-md transition flex items-center justify-between group">
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
+                    <div className="h-12 w-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs">
                       {c.course_title?.substring(0,2).toUpperCase() || "CR"}
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-700">{c.course_title}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Enrolled on: {new Date(c.enrolled_at).toLocaleDateString()}</p>
+                      <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">{c.course_title}</h4>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-1">Enrolled on: {new Date(c.enrolled_at).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <button 
                     onClick={() => navigate(`/student/courses/${c.course}`)}
-                    className="p-2 bg-slate-50 group-hover:bg-indigo-50 text-slate-400 group-hover:text-indigo-600 rounded-xl transition cursor-pointer"
+                    className="p-2 bg-slate-50 dark:bg-slate-800 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 rounded-xl transition cursor-pointer"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -259,29 +259,29 @@ export default function StudentDashboardOverview() {
 
         {/* Recommended for You Grid */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-slate-800">Recommended for You</h3>
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Recommended for You</h3>
           {recommendations.length === 0 ? (
-            <div className="bg-white border border-slate-200/60 rounded-2xl p-6 text-center">
-              <p className="text-slate-500 text-xs font-semibold">You have enrolled in all available courses!</p>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-6 text-center">
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold">You have enrolled in all available courses!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {recommendations.map((rec) => (
                 <div 
                   key={rec.id} 
-                  className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex justify-between items-center group cursor-pointer"
+                  className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 p-5 rounded-2xl shadow-sm hover:shadow-md transition duration-200 flex justify-between items-center group cursor-pointer"
                   onClick={() => navigate("/student/courses")}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs">
+                    <div className="h-12 w-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs">
                       {rec.level?.substring(0,3).toUpperCase() || "EDU"}
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition">{rec.title}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{rec.level} • {rec.duration}</p>
+                      <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">{rec.title}</h4>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-1">{rec.level} • {rec.duration}</p>
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition" />
+                  <ChevronRight size={16} className="text-slate-400 dark:text-slate-500 group-hover:translate-x-1 transition" />
                 </div>
               ))}
             </div>

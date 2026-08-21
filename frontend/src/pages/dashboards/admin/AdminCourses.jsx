@@ -188,8 +188,8 @@ export default function AdminCourses() {
         )}
 
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-800">Course Moderation</h2>
-          <p className="text-sm text-slate-500 font-medium">Review, publish, and audit every course on the platform</p>
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Course Moderation</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Review, publish, and audit every course on the platform</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -201,9 +201,9 @@ export default function AdminCourses() {
             { label: "Intermediate", val: stats.intermediate_courses },
             { label: "Advanced", val: stats.advanced_courses },
           ].map((s, i) => (
-            <div key={i} className="bg-white border border-slate-200/60 rounded-2xl p-4">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{s.label}</span>
-              <span className="text-xl font-black text-slate-800">{s.val ?? 0}</span>
+            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-4 transition-colors duration-200">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">{s.label}</span>
+              <span className="text-xl font-black text-slate-800 dark:text-slate-100">{s.val ?? 0}</span>
             </div>
           ))}
         </div>
@@ -216,7 +216,7 @@ export default function AdminCourses() {
               className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition
                 ${activeTab === tab.key
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white text-slate-500 border border-slate-200/60 hover:bg-slate-50"}`}
+                  : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"}`}
             >
               {tab.label}
             </button>
@@ -228,69 +228,52 @@ export default function AdminCourses() {
             <div className="h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : courses.length === 0 ? (
-          <div className="bg-white border border-slate-200/60 rounded-3xl p-12 text-center">
-            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-700">No Courses Found</h3>
-            <p className="text-xs text-slate-400 mt-1">Nothing matches this filter right now.</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-12 text-center">
+            <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No Courses Found</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Nothing matches this filter right now.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((c) => (
               <div
                 key={c.id}
-                className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-colors duration-200"
               >
                 <div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-extrabold tracking-wider bg-slate-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-md uppercase">
+                    <span className="text-[9px] font-extrabold tracking-wider bg-slate-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60 px-2.5 py-1 rounded-md uppercase">
                       {c.level || "beginner"}
                     </span>
                     {statusBadge(c.status)}
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-800 mt-3 leading-snug">{c.title}</h3>
-                  <p className="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-3 leading-snug">{c.title}</h3>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 flex items-center gap-1.5">
                     <UserIcon size={12} />
                     {c.mentor?.username || "Unassigned"}
                   </p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 leading-relaxed line-clamp-3">
+                    {c.description || "No description provided."}
+                  </p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-bold uppercase">Duration: {c.duration}</p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                  <span>{c.module_count ?? 0} Modules · {c.lesson_count ?? 0} Lessons</span>
-                  <span>{new Date(c.created_at).toLocaleDateString()}</span>
-                </div>
+                <div className="flex gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    onClick={() => openCourseDetail(c.id)}
+                    className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition cursor-pointer text-center flex items-center justify-center gap-1"
+                  >
+                    <Eye size={13} />
+                    <span>Audit Syllabus</span>
+                  </button>
 
-                {/* View Details button - explicit entry point into the modal */}
-                <button
-                  onClick={() => openCourseDetail(c.id)}
-                  className="mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[11px] font-bold cursor-pointer transition"
-                >
-                  <Eye size={14} /> View Details
-                </button>
-
-                <div className="mt-2 flex gap-2">
-                  {c.status === "published" ? (
-                    <button
-                      onClick={() => handleUnpublish(c.id)}
-                      disabled={actionLoadingId === c.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-600 text-[11px] font-bold cursor-pointer disabled:opacity-50"
-                    >
-                      <XCircle size={13} /> Unpublish
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handlePublish(c.id)}
-                      disabled={actionLoadingId === c.id}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-[11px] font-bold cursor-pointer disabled:opacity-50"
-                    >
-                      <CheckCircle2 size={13} /> Publish
-                    </button>
-                  )}
                   <button
                     onClick={() => setDeletingCourse(c)}
-                    className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 text-[11px] font-bold cursor-pointer"
+                    className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition cursor-pointer"
+                    title="Delete Course"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
@@ -299,20 +282,19 @@ export default function AdminCourses() {
         )}
       </div>
 
-      {/* Course Detail Modal - enlarged */}
       {selectedCourseId && (
-        <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-5 flex justify-between items-center z-10">
-              <h3 className="text-lg font-bold text-slate-800">Course Detail</h3>
-              <button onClick={closeCourseDetail} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 px-8 py-5 flex justify-between items-center z-10">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Course Detail</h3>
+              <button onClick={closeCourseDetail} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X size={22} />
               </button>
             </div>
 
             <div className="p-8 space-y-7">
               {actionError && (
-                <div className="bg-rose-50 text-rose-600 border border-rose-100 px-3 py-2 rounded-xl text-xs font-semibold">
+                <div className="bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/60 px-3 py-2 rounded-xl text-xs font-semibold">
                   {actionError}
                 </div>
               )}
@@ -325,15 +307,15 @@ export default function AdminCourses() {
                 <>
                   <div className="flex justify-between items-start">
                     <div>
-                      <h2 className="text-2xl font-black text-slate-800">{courseDetail.title}</h2>
-                      <p className="text-xs text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+                      <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100">{courseDetail.title}</h2>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1.5 flex items-center gap-1.5">
                         <UserIcon size={13} /> {courseDetail.mentor?.username || "Unassigned"}
                       </p>
                     </div>
                     {statusBadge(courseDetail.status)}
                   </div>
 
-                  <p className="text-sm text-slate-500 leading-relaxed bg-slate-50/60 p-4 rounded-2xl">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50/60 dark:bg-slate-800/60 p-4 rounded-2xl">
                     {courseDetail.description || "No description provided."}
                   </p>
 
@@ -342,7 +324,7 @@ export default function AdminCourses() {
                       <button
                         onClick={() => handleUnpublish(courseDetail.id)}
                         disabled={actionLoadingId === courseDetail.id}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold cursor-pointer disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-600 dark:text-amber-400 text-xs font-bold cursor-pointer disabled:opacity-50"
                       >
                         <XCircle size={14} /> Unpublish
                       </button>
@@ -350,113 +332,81 @@ export default function AdminCourses() {
                       <button
                         onClick={() => handlePublish(courseDetail.id)}
                         disabled={actionLoadingId === courseDetail.id}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-bold cursor-pointer disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 text-xs font-bold cursor-pointer disabled:opacity-50"
                       >
                         <CheckCircle2 size={14} /> Publish
                       </button>
                     )}
                     <button
                       onClick={() => setDeletingCourse(courseDetail)}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 text-xs font-bold cursor-pointer"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 text-rose-500 dark:text-rose-400 text-xs font-bold cursor-pointer"
                     >
                       <Trash2 size={14} /> Delete Course
                     </button>
                   </div>
 
-                  {/* Syllabus tree: Module -> Lesson -> Resource, each level labeled */}
-                  <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <h4 className="text-sm font-bold text-slate-700">Syllabus</h4>
+                  <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">Syllabus</h4>
 
                     {(courseDetail.modules || []).length === 0 ? (
-                      <p className="text-xs text-slate-400">No modules added yet.</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">No modules added yet.</p>
                     ) : (
                       courseDetail.modules.map((mod, modIdx) => (
-                        <div key={mod.id} className="border border-slate-200/60 rounded-2xl overflow-hidden">
+                        <div key={mod.id} className="border border-slate-200/60 dark:border-slate-800 rounded-2xl overflow-hidden">
                           <button
                             onClick={() => toggleModule(mod.id)}
-                            className="w-full flex items-center justify-between px-5 py-3.5 bg-slate-50/80 cursor-pointer"
+                            className="w-full flex items-center justify-between px-5 py-3.5 bg-slate-50/80 dark:bg-slate-800/80 cursor-pointer"
                           >
                             <span className="flex items-center gap-2.5">
-                              <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded uppercase tracking-wide">
+                              <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800/60 px-2 py-0.5 rounded uppercase tracking-wide">
                                 Module {modIdx + 1}
                               </span>
-                              <span className="text-sm font-bold text-slate-700">{mod.title}</span>
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{mod.title}</span>
                             </span>
-                            {expandedModules[mod.id] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                            {expandedModules[mod.id] ? <ChevronDown size={16} className="text-slate-400" /> : <ChevronRight size={16} className="text-slate-400" />}
                           </button>
 
                           {expandedModules[mod.id] && (
-                            <div className="p-5 space-y-3 bg-white">
+                            <div className="p-5 space-y-3 bg-white dark:bg-slate-900">
                               {(mod.lessons || []).length === 0 ? (
-                                <p className="text-xs text-slate-400">No lessons in this module.</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500">No lessons in this module.</p>
                               ) : (
                                 mod.lessons.map((lesson, lessonIdx) => (
-                                  <div key={lesson.id} className="border border-slate-100 rounded-xl overflow-hidden">
+                                  <div key={lesson.id} className="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden">
                                     <button
                                       onClick={() => toggleLesson(lesson.id)}
-                                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50/60 cursor-pointer"
+                                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50/60 dark:hover:bg-slate-800/60 cursor-pointer"
                                     >
                                       <span className="flex items-center gap-2.5 min-w-0">
-                                        <span className="text-[8px] font-black text-purple-500 bg-purple-50 border border-purple-100 px-1.5 py-0.5 rounded uppercase tracking-wide shrink-0">
+                                        <span className="text-[8px] font-black text-purple-500 bg-purple-50 dark:bg-purple-950/60 border border-purple-100 dark:border-purple-800/60 px-1.5 py-0.5 rounded uppercase tracking-wide shrink-0">
                                           Lesson {lessonIdx + 1}
                                         </span>
-                                        <span className="text-xs font-bold text-slate-700 truncate">{lesson.title}</span>
-                                        {lesson.is_free_preview && (
-                                          <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 shrink-0">
-                                            <Unlock size={10} /> Preview
-                                          </span>
-                                        )}
+                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{lesson.title}</span>
                                       </span>
-                                      {expandedLessons[lesson.id] ? <ChevronDown size={14} className="shrink-0" /> : <ChevronRight size={14} className="shrink-0" />}
+                                      {expandedLessons[lesson.id] ? <ChevronDown size={14} className="text-slate-400 shrink-0" /> : <ChevronRight size={14} className="text-slate-400 shrink-0" />}
                                     </button>
 
                                     {expandedLessons[lesson.id] && (
-                                      <div className="px-4 pb-4 space-y-3 border-t border-slate-50">
-                                        {/* Lesson video player - embedded, not an outbound link */}
-                                        <div className="pt-3 space-y-2">
-                                          {lesson.video_url && (
-                                            <div className="rounded-xl overflow-hidden bg-slate-900 aspect-video">
-                                              {getYoutubeEmbedUrl(lesson.video_url) ? (
-                                                <iframe
-                                                  src={getYoutubeEmbedUrl(lesson.video_url)}
-                                                  title={lesson.title}
-                                                  className="w-full h-full"
-                                                  frameBorder="0"
-                                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                  allowFullScreen
-                                                />
-                                              ) : (
-                                                <video
-                                                  src={
-                                                    lesson.video_url.startsWith("http")
-                                                      ? lesson.video_url
-                                                      : `http://127.0.0.1:8000${lesson.video_url}`
-                                                  }
-                                                  controls
-                                                  className="w-full h-full"
-                                                />
-                                              )}
-                                            </div>
-                                          )}
-                                          {lesson.duration && (
-                                            <p className="flex items-center gap-2 text-[11px] font-medium text-slate-400">
-                                              <Clock size={12} /> {lesson.duration}
-                                            </p>
-                                          )}
-                                          {lesson.content && (
-                                            <p className="text-xs text-slate-500 leading-relaxed bg-slate-50/60 p-3 rounded-lg">
+                                      <div className="p-4 bg-slate-50/40 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                                        <div>
+                                          <span className="text-[9px] font-black text-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800/60 px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                            Content
+                                          </span>
+                                          {lesson.content ? (
+                                            <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed whitespace-pre-wrap bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-3 rounded-lg">
                                               {lesson.content}
                                             </p>
+                                          ) : (
+                                            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">No written content.</p>
                                           )}
                                         </div>
 
-                                        {/* Resources under this lesson */}
                                         <div>
-                                          <span className="text-[9px] font-black text-rose-500 bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded uppercase tracking-wide">
+                                          <span className="text-[9px] font-black text-rose-500 bg-rose-50 dark:bg-rose-950/60 border border-rose-100 dark:border-rose-900/60 px-1.5 py-0.5 rounded uppercase tracking-wide">
                                             Resources
                                           </span>
                                           {(lesson.resources || []).length === 0 ? (
-                                            <p className="text-[11px] text-slate-400 mt-2">No resources attached.</p>
+                                            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-2">No resources attached.</p>
                                           ) : (
                                             <div className="mt-2 space-y-1.5">
                                               {lesson.resources.map((res) => {
@@ -469,7 +419,7 @@ export default function AdminCourses() {
                                                     href={downloadUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center gap-2 text-[11px] font-semibold text-slate-500 hover:text-indigo-600 transition"
+                                                    className="flex items-center gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
                                                   >
                                                     <FileText size={12} />
                                                     {res.title}
@@ -493,25 +443,24 @@ export default function AdminCourses() {
                   </div>
                 </>
               ) : (
-                <p className="text-xs text-slate-400 text-center py-8">Failed to load course details.</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-8">Failed to load course details.</p>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deletingCourse && (
-        <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-slate-800">Delete Course?</h3>
-            <p className="text-xs text-slate-500">
-              This will permanently remove <span className="font-bold text-slate-700">"{deletingCourse.title}"</span> along with all its modules, lessons, and resources. This cannot be undone.
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Delete Course?</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              This will permanently remove <span className="font-bold text-slate-700 dark:text-slate-200">"{deletingCourse.title}"</span> along with all its modules, lessons, and resources. This cannot be undone.
             </p>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setDeletingCourse(null)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold cursor-pointer hover:bg-slate-50"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>
@@ -529,5 +478,3 @@ export default function AdminCourses() {
     </DashboardLayout>
   );
 }
-
-// dashboard/admin/AdminCourses.jsx

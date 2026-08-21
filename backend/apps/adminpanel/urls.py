@@ -20,9 +20,9 @@ from .views.mentors import (AdminMentorListAPIView,
                             AdminMentorDeleteAPIView)
 
 from .views.students import (AdminStudentListAPIView,
-                            AdminStudentDetailAPIView,
-                            AdminStudentStatusAPIView,
-                            AdminStudentDeleteAPIView)                            
+                             AdminStudentDetailAPIView,
+                             AdminStudentStatusAPIView,
+                             AdminStudentDeleteAPIView)                            
 
 urlpatterns = [
 

@@ -49,26 +49,26 @@ export default function LessonAIChat({ courseId, lessonId, lessonTitle }) {
     };
 
     return (
-        <div className="bg-white border border-slate-200/60 rounded-3xl shadow-sm overflow-hidden flex flex-col h-[420px]">
-            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden flex flex-col h-[420px] transition-colors duration-200">
+            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5 bg-slate-50/50 dark:bg-slate-800/40">
                 <div className="h-8 w-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
                     <Bot size={16} />
                 </div>
                 <div>
-                    <h4 className="text-sm font-bold text-slate-800">Ask AI About This Lesson</h4>
-                    <span className="text-[10px] text-indigo-600 font-bold flex items-center gap-1">
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Ask AI About This Lesson</h4>
+                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1">
                         <Sparkles size={9} /> Grounded in course content
                     </span>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/20">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/20 dark:bg-slate-950/30">
                 {messages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                         <div
                             className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${msg.sender === "user"
                                 ? "bg-indigo-600 text-white rounded-br-none"
-                                : "bg-white border border-slate-200/80 text-slate-800 rounded-bl-none"
+                                : "bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 rounded-bl-none"
                                 }`}
                         >
                             {msg.loading ? (
@@ -95,14 +95,14 @@ export default function LessonAIChat({ courseId, lessonId, lessonTitle }) {
                 <div ref={bottomRef}></div>
             </div>
 
-            <form onSubmit={handleSend} className="p-3 border-t border-slate-100 flex gap-2">
+            <form onSubmit={handleSend} className="p-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-2">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask about this lesson..."
                     disabled={isLoading}
-                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/20"
                 />
                 <button
                     type="submit"

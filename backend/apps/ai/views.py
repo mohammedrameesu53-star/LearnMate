@@ -36,6 +36,7 @@ class AIChatView(APIView):
                 try:
                     ai_response = requests.post(
                         f"{settings.AI_SERVICE_URL}/rag-chat",
+                        headers={"X-Internal-Secret": settings.AI_SERVICE_SECRET},
                         json={"question": message, "course_id": course_id},
                         timeout=30,
                     )

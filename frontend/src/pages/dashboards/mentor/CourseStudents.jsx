@@ -65,29 +65,29 @@ export default function CourseStudents() {
           </div>
         )}
 
-        <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+        <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm transition-colors duration-200">
           <div>
-            <h2 className="text-xl font-extrabold text-slate-800">Enrolled Students</h2>
-            <p className="text-xs text-slate-500 font-medium mt-1">Audit student learning profiles, timelines, and task submissions</p>
+            <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Enrolled Students</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Audit student learning profiles, timelines, and task submissions</p>
           </div>
-          <div className="h-10 w-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-sm shrink-0 shadow-sm">
+          <div className="h-10 w-10 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800/60 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm shrink-0 shadow-sm">
             <Users size={18} />
           </div>
         </div>
 
         {/* Student list */}
         {students.length === 0 ? (
-          <div className="bg-white border border-slate-200/60 rounded-3xl p-12 text-center">
-            <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-700">No Mentees Enrolled</h3>
-            <p className="text-xs text-slate-400 mt-1">No student has registered for this course yet.</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-12 text-center">
+            <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No Mentees Enrolled</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">No student has registered for this course yet.</p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200/60 rounded-3xl shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden transition-colors duration-200">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                     <th className="px-6 py-4">Student Name</th>
                     <th className="px-6 py-4">Email</th>
                     <th className="px-6 py-4">Enrolled Date</th>
@@ -96,32 +96,32 @@ export default function CourseStudents() {
                     <th className="px-6 py-4">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-xs font-semibold">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs font-semibold">
                   {students.map((enrollment) => (
-                    <tr key={enrollment.student_id} className="hover:bg-slate-50/40 transition">
-                      <td className="px-6 py-4 text-slate-800">{enrollment.student_name}</td>
-                      <td className="px-6 py-4 text-slate-500">{enrollment.email}</td>
-                      <td className="px-6 py-4 text-slate-400 font-medium">
+                    <tr key={enrollment.student_id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/40 transition">
+                      <td className="px-6 py-4 text-slate-800 dark:text-slate-200">{enrollment.student_name}</td>
+                      <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{enrollment.email}</td>
+                      <td className="px-6 py-4 text-slate-400 dark:text-slate-500 font-medium">
                         {new Date(enrollment.enrolled_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-indigo-600 font-bold">{enrollment.progress}%</span>
-                        <div className="w-20 bg-slate-100 h-1.5 rounded-full overflow-hidden mx-auto mt-1">
-                          <div className="bg-indigo-600 h-full" style={{ width: `${enrollment.progress}%` }}></div>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-bold">{enrollment.progress}%</span>
+                        <div className="w-20 bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mx-auto mt-1">
+                          <div className="bg-indigo-600 dark:bg-indigo-500 h-full" style={{ width: `${enrollment.progress}%` }}></div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-2 py-0.5 text-[9px] font-bold rounded border
                           ${enrollment.completed 
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                            : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/60' 
+                            : 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/60'}`}>
                           {enrollment.completed ? "COMPLETED" : "IN PROGRESS"}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <button 
                           onClick={() => navigate(`/mentor/courses/${courseId}/students/${enrollment.student_id}`)}
-                          className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition text-[10px] font-bold cursor-pointer"
+                          className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-600 dark:text-indigo-400 rounded-lg transition text-[10px] font-bold cursor-pointer"
                         >
                           View Progress
                         </button>

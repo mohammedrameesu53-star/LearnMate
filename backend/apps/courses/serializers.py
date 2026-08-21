@@ -29,6 +29,14 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = "__all__"
 
+    def validate(self, data):
+        source_type = data.get("source_type", getattr(self.instance, "source_type", "youtube"))
+        if source_type == "youtube" and not data.get("video_url") and not getattr(self.instance, "video_url", None):
+            raise serializers.ValidationError("video_url is required when source_type is 'youtube'.")
+        if source_type == "upload" and not data.get("video_file") and not getattr(self.instance, "video_file", None):
+            raise serializers.ValidationError("video_file is required when source_type is 'upload'.")
+        return data    
+
 class LessonResourceSerializer(serializers.ModelSerializer):
 
     class Meta:

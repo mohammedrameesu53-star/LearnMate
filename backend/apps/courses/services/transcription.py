@@ -3,10 +3,15 @@ import re
 import tempfile
 from django.conf import settings
 
+# pyrefly: ignore [missing-import]
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
+# pyrefly: ignore [missing-import]
 import yt_dlp
+# pyrefly: ignore [missing-import]
 from faster_whisper import WhisperModel
+# pyrefly: ignore [missing-import]
 from groq import Groq
+# pyrefly: ignore [missing-import]
 from langdetect import detect, LangDetectException
 
 
@@ -122,7 +127,7 @@ def transcribe_with_whisper(audio_path: str) -> tuple[str, str]:
 def translate_to_english_via_groq(text: str) -> str:
     """Sends non-English transcript text to Groq for translation to English."""
     response = _groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[
             {
                 "role": "system",
@@ -195,3 +200,44 @@ def get_lesson_transcript(video_url: str) -> dict:
         "detected_language": detected_language,
         "source": source,
     }
+
+
+def get_transcript_from_file(video_file_url: str) -> dict:
+    """
+    Transcribe an uploaded video (S3-hosted) directly with faster-whisper.
+    No YouTube captions step since there's no YouTube video to check —
+    goes straight to Whisper, same model instance as the YouTube path.
+    """
+    import requests
+
+    tmp_dir = tempfile.mkdtemp()
+    tmp_path = os.path.join(tmp_dir, "upload.mp4")
+
+    response = requests.get(video_file_url, stream=True)
+    response.raise_for_status()
+    with open(tmp_path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+
+    try:
+        text, detected_language = transcribe_with_whisper(tmp_path)
+
+        if not text:
+            raise ValueError("Transcription produced no usable text.")
+
+        if detected_language == "en":
+            original_transcript = text
+            english_transcript = text
+        else:
+            original_transcript = text
+            english_transcript = translate_to_english_via_groq(text)
+
+        return {
+            "original_transcript": original_transcript,
+            "transcript": english_transcript,
+            "detected_language": detected_language,
+            "source": "whisper",
+        }
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)

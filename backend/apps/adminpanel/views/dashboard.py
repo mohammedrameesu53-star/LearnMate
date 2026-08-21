@@ -49,3 +49,5 @@ class AdminDashboardView(APIView):
         "recent_users": serializer.data
 
     })
+
+    # apps.adminpanel.views.dashboard.py

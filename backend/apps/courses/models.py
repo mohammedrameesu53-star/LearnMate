@@ -131,6 +131,15 @@ class Lesson(models.Model):
         blank=True,
         null=True
     )
+    
+    video_file = models.FileField(upload_to="lesson_videos/", blank=True, null=True)
+    
+    
+    source_type = models.CharField(
+    max_length=20,
+    choices=[("youtube", "YouTube"), ("upload", "Uploaded")],
+    default="youtube",
+    )
 
     duration = models.CharField(
         max_length=50,
@@ -154,15 +163,27 @@ class Lesson(models.Model):
         default="pending"
     )
 
+    embedding_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pending", "Pending"),
+            ("completed", "Completed"),
+            ("failed", "Failed"),
+        ],
+        default="pending"
+    )    
+
     original_transcript = models.TextField(
         blank=True,
         null=True
     )  # raw transcript in the video's spoken language (e.g. Malayalam)
-       # `transcript` (already added) now specifically holds the ENGLISH version used for embeddings/RAG
+    # `transcript` (already added) now specifically holds the ENGLISH version used for embeddings/RAG
 
     created_at = models.DateTimeField(
         auto_now_add=True
     )
+
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["order"]

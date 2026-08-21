@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+# pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
 

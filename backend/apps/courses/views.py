@@ -25,6 +25,8 @@ from apps.accounts.permissions import (
 from .tasks import send_course_completion_email
 from .models import Course,Module,Lesson,LessonResource,Enrollment,LessonProgress
 from .serializers import CourseSerializer,ModuleSerializer,LessonSerializer,LessonResourceSerializer,EnrollmentSerializer,CourseStudentSerializer,CompletedLessonSerializer
+# pyrefly: ignore [missing-import]
+from apps.courses.tasks import generate_lesson_transcript
 
 # Mentor Course CRUD.
 # *************************************************
@@ -446,9 +448,15 @@ class CreateLessonView(APIView):
 
         if serializer.is_valid():
 
-            serializer.save(
+            lesson = serializer.save(
                 module=module
             )
+
+            # Automatically trigger transcription + embedding in the
+            # background if this lesson has a video attached — no manual
+            # shell commands needed anymore.
+            if lesson.video_url or lesson.video_file:
+                generate_lesson_transcript.delay(lesson.id)
 
             return Response(
                 serializer.data,
@@ -532,6 +540,11 @@ class UpdateLessonView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+        # Capture the video source before any changes are applied, so we
+        # can tell afterward whether it actually changed.
+        old_video_url = lesson.video_url
+        old_video_file = lesson.video_file.name if lesson.video_file else None
+
         serializer = LessonSerializer(
             lesson,
             data=request.data,
@@ -540,7 +553,35 @@ class UpdateLessonView(APIView):
 
         if serializer.is_valid():
 
-            serializer.save()
+            updated_lesson = serializer.save()
+
+            new_video_file = (
+                updated_lesson.video_file.name if updated_lesson.video_file else None
+            )
+
+            video_url_changed = (
+                updated_lesson.video_url
+                and updated_lesson.video_url != old_video_url
+            )
+            video_file_changed = (
+                new_video_file
+                and new_video_file != old_video_file
+            )
+
+            # Only re-trigger transcription if the video source actually
+            # changed — editing the title/description shouldn't waste
+            # time re-processing an unchanged video.
+            if video_url_changed or video_file_changed:
+                # Reset status so the UI reflects that fresh processing
+                # has started, rather than showing stale "completed" info
+                # for content that no longer matches the new video.
+                updated_lesson.transcript_status = "pending"
+                updated_lesson.embedding_status = "pending"
+                updated_lesson.save(update_fields=[
+                    "transcript_status", "embedding_status"
+                ])
+
+                generate_lesson_transcript.delay(updated_lesson.id)
 
             return Response(serializer.data)
 
@@ -548,8 +589,6 @@ class UpdateLessonView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-
-
 class DeleteLessonView(APIView):
 
     permission_classes = [IsAuthenticated]

@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from .models import Course,Enrollment, LessonProgress,Lesson
 # pyrefly: ignore [missing-import]
-from apps.courses.services.transcription import get_lesson_transcript
+from apps.courses.services.transcription import get_lesson_transcript,get_transcript_from_file
 from django.utils import timezone
 from datetime import timedelta
 import requests
@@ -125,7 +125,10 @@ def generate_lesson_transcript(lesson_id):
     except Lesson.DoesNotExist:
         return
 
-    if not lesson.video_url:
+    has_youtube = bool(lesson.video_url)
+    has_upload = lesson.source_type == "upload" and bool(lesson.video_file)
+
+    if not has_youtube and not has_upload:
         lesson.transcript_status = "failed"
         lesson.save(update_fields=["transcript_status"])
         return
@@ -134,7 +137,10 @@ def generate_lesson_transcript(lesson_id):
     lesson.save(update_fields=["transcript_status"])
 
     try:
-        result = get_lesson_transcript(lesson.video_url)
+        if has_upload:
+            result = get_transcript_from_file(lesson.video_file.url)
+        else:
+            result = get_lesson_transcript(lesson.video_url)
 
         lesson.original_transcript = result["original_transcript"]
         lesson.transcript = result["transcript"]
@@ -143,7 +149,7 @@ def generate_lesson_transcript(lesson_id):
             "original_transcript", "transcript", "transcript_status"
         ])
 
-    # Automatically trigger embedding now that we have a transcript
+        # Automatically trigger embedding now that we have a transcript
         embed_lesson_transcript.delay(lesson.id)
 
     except Exception as e:
@@ -153,8 +159,8 @@ def generate_lesson_transcript(lesson_id):
         print(f"Transcription failed for lesson {lesson_id}: {e}")
 
 
-@shared_task
-def embed_lesson_transcript(lesson_id):
+@shared_task(bind=True, max_retries=3, default_retry_delay=30)
+def embed_lesson_transcript(self, lesson_id):
     try:
         lesson = Lesson.objects.select_related("module__course").get(id=lesson_id)
     except Lesson.DoesNotExist:
@@ -165,6 +171,17 @@ def embed_lesson_transcript(lesson_id):
 
     course_id = lesson.module.course.id
 
+    headers = {"X-Internal-Secret": settings.AI_SERVICE_SECRET}
+
+    # Clear any existing chunks for this lesson first — ensures a clean
+    # slate before re-embedding, so no orphaned chunks linger from a
+    # previous, longer video if this one produces fewer chunks.
+    requests.delete(
+        f"{settings.AI_SERVICE_URL}/lesson/{lesson_id}",
+        headers=headers,
+        timeout=30,
+    )
+
     try:
         response = requests.post(
             f"{settings.AI_SERVICE_URL}/embed",
@@ -173,10 +190,46 @@ def embed_lesson_transcript(lesson_id):
                 "course_id": course_id,
                 "transcript_text": lesson.transcript,
             },
+            headers=headers,
             timeout=60,
         )
         response.raise_for_status()
+
+        lesson.embedding_status = "completed"
+        lesson.save(update_fields=["embedding_status"])
         print(f"Embedded lesson {lesson_id}: {response.json()}")
 
     except requests.RequestException as e:
-        print(f"Embedding failed for lesson {lesson_id}: {e}")
+        print(f"Embedding failed for lesson {lesson_id}: {e} — retry {self.request.retries}/3")
+        lesson.embedding_status = "failed"
+        lesson.save(update_fields=["embedding_status"])
+
+        # Automatically retry (handles FastAPI not being ready yet, brief network issues)
+        raise self.retry(exc=e)
+
+        
+@shared_task
+def retry_stuck_embeddings():
+    """
+    Safety net: finds lessons whose transcript completed but embedding
+    never finished (stuck pending, or failed), and automatically
+    re-queues them. Runs on a schedule via Celery Beat.
+    """
+    cutoff = timezone.now() - timedelta(minutes=10)
+
+    stuck_lessons = Lesson.objects.filter(
+        transcript_status="completed",
+    ).exclude(
+        embedding_status="completed"
+    ).filter(
+        updated_at__lt=cutoff
+    )
+
+    count = 0
+    for lesson in stuck_lessons:
+        embed_lesson_transcript.delay(lesson.id)
+        count += 1
+
+    if count:
+        print(f"retry_stuck_embeddings: re-queued {count} stuck lesson(s)")
+

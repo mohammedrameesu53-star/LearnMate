@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import api from '../../api';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
+import { Sun, Moon } from 'lucide-react';
 
 export default function Register() {
     const navigate = useNavigate();
+    const { isDarkMode, toggleTheme } = useTheme();
     
     // Navigation Step state: 'form', 'otp', or 'mfa'
     const [step, setStep] = useState('form');
@@ -117,53 +120,64 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
-                <h2 className="text-3xl font-extrabold text-center text-white mb-2">LearnMate</h2>
-                <p className="text-center text-slate-400 text-sm mb-6">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 px-4 relative">
+            {/* Top Right Theme Toggle Button */}
+            <div className="absolute top-6 right-6">
+                <button
+                    onClick={toggleTheme}
+                    className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                    title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                >
+                    {isDarkMode ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-slate-600" />}
+                </button>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md transition-colors duration-200">
+                <h2 className="text-3xl font-extrabold text-center text-slate-900 dark:text-white mb-2">LearnMate</h2>
+                <p className="text-center text-slate-500 dark:text-slate-400 text-sm mb-6">
                     {step === 'form' && 'Create your Student Account'}
                     {step === 'otp' && 'Verify your Email Address'}
                     {step === 'mfa' && 'Secure your Account with MFA'}
                 </p>
 
-                {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm mb-4 text-center">{error}</div>}
-                {message && <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-lg text-sm mb-4 text-center">{message}</div>}
+                {error && <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-3 rounded-lg text-sm mb-4 text-center font-medium">{error}</div>}
+                {message && <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-3 rounded-lg text-sm mb-4 text-center font-medium">{message}</div>}
 
                 {step === 'form' && (
                     /* REGISTRATION INPUT CARD VIEW */
                     <form onSubmit={handleRegisterSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Username</label>
                             <input
                                 type="text" name="username" required value={formData.username} onChange={handleFormChange}
-                                className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Choose a username"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
                             <input
                                 type="email" name="email" required value={formData.email} onChange={handleFormChange}
-                                className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 placeholder="you@example.com"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
                             <input
                                 type="password" name="password" required value={formData.password} onChange={handleFormChange}
-                                className="w-full p-3 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Minimum 8 characters"
                             />
                         </div>
                         <button
                             type="submit" disabled={loading}
-                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-3 rounded-xl transition disabled:opacity-50"
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-3 rounded-xl transition disabled:opacity-50 cursor-pointer shadow-lg"
                         >
                             {loading ? 'Creating Account...' : 'Register'}
                         </button>
-                        <p className="text-center text-sm text-slate-400 mt-4">
-                            Already verified? <span onClick={() => navigate('/login')} className="text-indigo-400 hover:underline cursor-pointer">Sign In</span>
+                        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
+                            Already verified? <span onClick={() => navigate('/login')} className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer">Sign In</span>
                         </p>
                     </form>
                 )}
@@ -171,27 +185,27 @@ export default function Register() {
                 {step === 'otp' && (
                     /* OTP SCREEN VERIFICATION INPUT INTERFACE */
                     <form onSubmit={handleVerifyOTP} className="space-y-5">
-                        <p className="text-xs text-slate-400 text-center">
-                            We sent a verification code to <span className="text-slate-200 font-medium">{formData.email}</span>. It expires in 5 minutes.
+                        <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                            We sent a verification code to <span className="text-slate-900 dark:text-slate-200 font-medium">{formData.email}</span>. It expires in 5 minutes.
                         </p>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1.5">Verification Code</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Verification Code</label>
                             <input
                                 type="text" required maxLength="6" value={otpCode} onChange={(e) => setOtpCode(e.target.value)}
-                                className="w-full p-3 text-center tracking-widest text-xl font-bold rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full p-3 text-center tracking-widest text-xl font-bold rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 placeholder="000000"
                             />
                         </div>
                         <button
                             type="submit" disabled={loading}
-                            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold p-3 rounded-xl transition disabled:opacity-50"
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold p-3 rounded-xl transition disabled:opacity-50 cursor-pointer shadow-lg"
                         >
                             {loading ? 'Validating...' : 'Verify Email'}
                         </button>
                         <div className="text-center pt-2">
                             <button
                                 type="button" onClick={handleResendOTP}
-                                className="text-sm text-indigo-400 hover:text-indigo-300 transition underline focus:outline-none"
+                                className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition underline focus:outline-none cursor-pointer"
                             >
                                 Didn't receive a code? Resend OTP
                             </button>
@@ -202,7 +216,7 @@ export default function Register() {
                 {step === 'mfa' && (
                     /* NEW: MFA QR CODE SCANNING VIEW STAGE */
                     <form onSubmit={handleVerifyMFASetup} className="space-y-5">
-                        <p className="text-xs text-slate-400 text-center">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
                             Scan the QR code below with your Authenticator App (Google Authenticator, Authy, etc.), then type the security token code below.
                         </p>
                         
@@ -217,17 +231,17 @@ export default function Register() {
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1.5">Authenticator App Token</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Authenticator App Token</label>
                             <input
                                 type="text" required maxLength="6" value={mfaCode} onChange={(e) => setMfaCode(e.target.value)}
-                                className="w-full p-3 text-center tracking-widest text-xl font-bold rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full p-3 text-center tracking-widest text-xl font-bold rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 placeholder="000000"
                             />
                         </div>
                         
                         <button
                             type="submit" disabled={loading}
-                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-3 rounded-xl transition disabled:opacity-50"
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-3 rounded-xl transition disabled:opacity-50 cursor-pointer shadow-lg"
                         >
                             {loading ? 'Confirming Code...' : 'Complete Registration'}
                         </button>

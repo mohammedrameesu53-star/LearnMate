@@ -25,3 +25,5 @@ export default function AdminMessages() {
     </DashboardLayout>
   );
 }
+
+// dashboard/admin/AdminMassages.jsx

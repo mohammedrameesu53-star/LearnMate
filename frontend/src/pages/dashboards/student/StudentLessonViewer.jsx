@@ -94,6 +94,7 @@ export default function StudentLessonViewer() {
     return url;
   };
 
+  const isUploadedVideo = lesson?.source_type === "upload" && lesson?.video_file;
   const embedVideoUrl = getEmbedUrl(lesson?.video_url);
 
   return (
@@ -121,7 +122,15 @@ export default function StudentLessonViewer() {
         )}
 
         {/* Video Player / Presentation Block */}
-        {embedVideoUrl ? (
+        {isUploadedVideo ? (
+          <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-sm bg-slate-900 border border-slate-200/50">
+            <video
+              src={lesson.video_file}
+              controls
+              className="w-full h-full"
+            />
+          </div>
+        ) : embedVideoUrl ? (
           <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-sm bg-slate-900 border border-slate-200/50">
             <iframe
               src={embedVideoUrl}

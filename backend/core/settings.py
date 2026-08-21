@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 # pyrefly: ignore [missing-import]
 from decouple import config
+# pyrefly: ignore [missing-import]
+from celery.schedules import crontab
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,7 +52,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'channels',
+    'storages',
     'django_celery_beat',
+    
 
     # Local Apps
     'apps.accounts',
@@ -147,9 +153,6 @@ STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-
-
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = config('EMAIL_HOST')
@@ -211,3 +214,45 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 GROQ_API_KEY = config("GROQ_API_KEY")
 
 AI_SERVICE_URL = "http://localhost:8001"
+
+
+CELERY_BEAT_SCHEDULE = {
+    "retry-stuck-embeddings": {
+        "task": "apps.courses.tasks.retry_stuck_embeddings",
+        "schedule": crontab(minute="*/10"),  # every 10 minutes
+    },
+}
+
+AI_SERVICE_SECRET = config("INTERNAL_API_SECRET")
+
+
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
+
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None  # bucket should stay private; we'll use signed URLs
+AWS_QUERYSTRING_AUTH = True     # generate signed URLs
+AWS_QUERYSTRING_EXPIRE = 3600   # signed URL valid for 1 hour
+
+# Django 6.x uses STORAGES dict instead of DEFAULT_FILE_STORAGE
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+
+
+
+
+
+
+
+
+

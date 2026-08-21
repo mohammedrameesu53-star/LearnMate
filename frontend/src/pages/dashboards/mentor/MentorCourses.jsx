@@ -139,8 +139,8 @@ export default function MentorCourses() {
 
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-800">Your Coordinated Courses</h2>
-            <p className="text-sm text-slate-500 font-medium">Create, edit, coordinate, and publish syllabus files</p>
+            <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Your Coordinated Courses</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Create, edit, coordinate, and publish syllabus files</p>
           </div>
           <button
             onClick={openCreateModal}
@@ -153,43 +153,43 @@ export default function MentorCourses() {
 
         {/* Modal form */}
         {showFormModal && (
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xl w-full max-w-md animate-scale-up">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">{formType === 'create' ? 'Create New Course' : 'Edit Course Settings'}</h3>
+          <div className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl w-full max-w-md animate-scale-up">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">{formType === 'create' ? 'Create New Course' : 'Edit Course Settings'}</h3>
               {actionError && (
-                <div className="bg-rose-50 border border-rose-100 text-rose-600 px-3 py-2 rounded-xl text-xs font-semibold mb-4">
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-100 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 px-3 py-2 rounded-xl text-xs font-semibold mb-4">
                   {actionError}
                 </div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Course Title</label>
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Course Title</label>
                   <input
                     type="text"
                     required
                     value={courseTitle}
                     onChange={e => setCourseTitle(e.target.value)}
                     placeholder="e.g. Introduction to Quantum Physics"
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
+                    className="w-full p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Description</label>
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Description</label>
                   <textarea
                     value={courseDesc}
                     onChange={e => setCourseDesc(e.target.value)}
                     placeholder="Provide a detailed syllabus overview..."
                     rows="3"
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none"
+                    className="w-full p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Level</label>
+                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Level</label>
                     <select
                       value={courseLevel}
                       onChange={e => setCourseLevel(e.target.value)}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
+                      className="w-full p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                     >
                       <option value="beginner">Beginner</option>
                       <option value="intermediate">Intermediate</option>
@@ -197,19 +197,19 @@ export default function MentorCourses() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Duration</label>
+                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Duration</label>
                     <input
                       type="text"
                       required
                       value={courseDuration}
                       onChange={e => setCourseDuration(e.target.value)}
                       placeholder="e.g. 8 weeks"
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm"
+                      className="w-full p-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                     />
                   </div>
                 </div>
                 <div className="flex gap-2 justify-end mt-6">
-                  <button type="button" onClick={() => setShowFormModal(false)} className="px-4 py-2 border rounded-xl text-xs font-semibold hover:bg-slate-50">Cancel</button>
+                  <button type="button" onClick={() => setShowFormModal(false)} className="px-4 py-2 border dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">Cancel</button>
                   <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-xs font-semibold">{isSubmitting ? "Submitting..." : formType === 'create' ? "Create" : "Save Changes"}</button>
                 </div>
               </form>
@@ -219,34 +219,34 @@ export default function MentorCourses() {
 
         {/* Courses list */}
         {courses.length === 0 ? (
-          <div className="bg-white border border-slate-200/60 rounded-3xl p-12 text-center">
-            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-700">No Coordinated Courses</h3>
-            <p className="text-xs text-slate-400 mt-1">Click the button above to launch your first class catalog.</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-12 text-center">
+            <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No Coordinated Courses</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Click the button above to launch your first class catalog.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {courses.map((c) => (
               <div
                 key={c.id}
-                className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between"
               >
                 <div>
                   <div className="flex justify-between items-start">
-                    <span className="text-[9px] font-extrabold tracking-wider bg-slate-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-md uppercase">
+                    <span className="text-[9px] font-extrabold tracking-wider bg-slate-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60 px-2.5 py-1 rounded-md uppercase">
                       {c.level || "Beginner"}
                     </span>
                     <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => openEditModal(c)}
-                        className="p-1.5 bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 rounded-lg transition cursor-pointer"
+                        className="p-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-slate-400 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition cursor-pointer"
                         title="Edit course settings"
                       >
                         <Edit2 size={12} />
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
-                        className="p-1.5 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer"
+                        className="p-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950 text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition cursor-pointer"
                         title="Delete course"
                       >
                         <Trash2 size={12} />
@@ -254,25 +254,25 @@ export default function MentorCourses() {
                     </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-800 mt-3 leading-snug">{c.title}</h3>
-                  <p className="text-xs text-slate-400 mt-2 leading-relaxed line-clamp-3">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 mt-3 leading-snug">{c.title}</h3>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 leading-relaxed line-clamp-3">
                     {c.description || "No description provided."}
                   </p>
-                  <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase">Estimated Duration: {c.duration}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 font-bold uppercase">Estimated Duration: {c.duration}</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
 
                   <button
                     onClick={() => navigate(`/mentor/courses/${c.id}/students`)}
-                    className="flex-1 py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/40 text-xs font-bold transition cursor-pointer text-center"
+                    className="flex-1 py-2 px-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200/40 dark:border-slate-700 text-xs font-bold transition cursor-pointer text-center"
                   >
                     Mentees
                   </button>
 
                   <button
                     onClick={() => navigate(`/mentor/courses/${c.id}/syllabus`)}
-                    className="flex-1 py-2 px-2.5 rounded-xl bg-slate-50 hover:bg-indigo-55 bg-indigo-50 text-indigo-600 border border-indigo-100 text-xs font-bold transition cursor-pointer text-center"
+                    className="flex-1 py-2 px-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60 text-xs font-bold transition cursor-pointer text-center"
                   >
                     Syllabus
                   </button>
