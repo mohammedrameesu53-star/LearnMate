@@ -247,6 +247,8 @@ STORAGES = {
     },
 }
 
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:5173")
+
 
 
 

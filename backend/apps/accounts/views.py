@@ -23,6 +23,8 @@ from io import BytesIO
 from rest_framework.permissions import IsAuthenticated
 from datetime import timedelta
 from django.utils import timezone
+# pyrefly: ignore [missing-import]
+from .models import MentorInvite
 
 
 
@@ -577,3 +579,78 @@ class StudentDashboardView(APIView):
             }
         )        
         
+
+class MentorInviteView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request):
+        serializer = MentorInviteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
+        invite = MentorInvite.objects.create(
+            email=email,
+            invited_by=request.user
+        )
+
+        invite_link = f"{settings.FRONTEND_URL}/register-mentor?token={invite.token}"
+
+        send_mail(
+            subject='You\'re invited to join LearnMate as a Mentor',
+            message=f'Click the link below to complete your mentor registration:\n\n{invite_link}\n\nThis link expires in 3 days.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        return Response(
+            {"message": f"Invite sent to {email}"},
+            status=status.HTTP_200_OK
+        )        
+
+    
+class RegisterMentorView(APIView):
+
+    def post(self, request):
+        serializer = RegisterMentorSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = serializer.validated_data['token']
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+
+        try:
+            invite = MentorInvite.objects.get(token=token)
+        except MentorInvite.DoesNotExist:
+            return Response({"message": "Invalid invite link."}, status=status.HTTP_404_NOT_FOUND)
+
+        if not invite.is_valid():
+            return Response({"message": "This invite link has expired or already been used."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Email is taken from the invite itself, never from client input —
+        # this is what "locks" registration to the invited address.
+        user = User(username=username, email=invite.email, role='mentor')
+        user.set_password(password)
+        user.save()
+
+        group = Group.objects.get(name='Mentor')
+        user.groups.add(group)
+
+        invite.is_used = True
+        invite.save()
+
+        # Reuse the same email-OTP + MFA setup flow students already go through
+        otp_code = generate_otp()
+        OTP.objects.create(user=user, code=otp_code)
+        send_mail(
+            subject='LearnMate Verification',
+            message=f'Your OTP is {otp_code}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        return Response(
+            {"message": "Mentor account created. Check your email to verify.", "email": user.email},
+            status=status.HTTP_201_CREATED
+        )

@@ -5,36 +5,19 @@ from django.contrib.auth.models import Group
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-
-    password = serializers.CharField(
-        write_only=True,
-        min_length=8
-    )
+    password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
         model = User
-
-        fields = (
-            'username',
-            'email',
-            'password',
-            'role'
-        )
+        fields = ('username', 'email', 'password')  # role removed — never client-writable
 
     def create(self, validated_data):
-
         password = validated_data.pop('password')
-
-        user = User(**validated_data)
-
+        user = User(**validated_data, role='student')
         user.set_password(password)
-
         user.save()
-        
-        group = Group.objects.get( name=user.role.capitalize() ) 
-        
-        user.groups.add(group)  
-
+        group = Group.objects.get(name='Student')
+        user.groups.add(group)
         return user
     
     
@@ -57,9 +40,7 @@ class VerifyOTPSerializer(serializers.Serializer):
     
 #  MFA (Multi-factor authentication)    
 
-class VerifyMFASetupSerializer(
-    serializers.Serializer
-):
+class VerifyMFASetupSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
 
@@ -111,4 +92,12 @@ class ResetPasswordSerializer(
         write_only=True
     )    
     
-   
+
+class MentorInviteSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class RegisterMentorSerializer(serializers.Serializer):
+    token = serializers.UUIDField()
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True, min_length=8)
