@@ -184,7 +184,7 @@ export default function StudentLessonViewer() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {resources.map((res) => {
                 const downloadUrl = res.file
-                  ? `http://127.0.0.1:8000${res.file}`
+                  ? `${res.file}`
                   : res.external_url;
 
                 return (

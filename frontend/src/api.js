@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000', 
+  baseURL: '', 
 });
 
 // 1. Request Interceptor: Attaches the current access token to outgoing requests
@@ -41,7 +41,7 @@ api.interceptors.response.use(
         }
 
         // Send a request to your exact Django SimpleJWT refresh endpoint
-        const response = await axios.post('http://127.0.0.1:8000/api/accounts/token/refresh/', {
+        const response = await axios.post('/api/accounts/token/refresh/', {
           refresh: refreshToken,
         });
 

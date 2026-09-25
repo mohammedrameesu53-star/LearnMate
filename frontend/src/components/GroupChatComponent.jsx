@@ -68,7 +68,7 @@ export default function GroupChatComponent() {
 
     // 2. Setup WebSocket connection
     const token = localStorage.getItem('access_token');
-    const wsUrl = `ws://localhost:8000/ws/group/${groupId}/?token=${token}`;
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws/group/${groupId}/?token=${token}`;
     const ws = new WebSocket(wsUrl);
     socketRef.current = ws;
 

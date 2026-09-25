@@ -27,7 +27,7 @@ export default function ForgotPassword() {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/accounts/forgot-password/', { email });
+            const response = await axios.post('/api/accounts/forgot-password/', { email });
             setMessage(response.data.message || 'Reset OTP sent successfully to your email inbox.');
             setStep('reset_step');
         } catch (err) {
@@ -46,7 +46,7 @@ export default function ForgotPassword() {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/accounts/reset-password/', {
+            const response = await axios.post('/api/accounts/reset-password/', {
                 email: email,
                 otp: otp,
                 new_password: newPassword

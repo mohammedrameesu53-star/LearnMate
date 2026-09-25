@@ -44,7 +44,7 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/accounts/login/', { email, password });
+            const response = await axios.post('/api/accounts/login/', { email, password });
 
             // If the backend states that MFA is mandatory, push to stage 2
             if (response.data.mfa_required) {
@@ -67,7 +67,7 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/accounts/verify-mfa/', {
+            const response = await axios.post('/api/accounts/verify-mfa/', {
                 email: email,
                 code: mfaCode
             });

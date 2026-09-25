@@ -175,7 +175,7 @@ export default function StudentResources() {
             {allResources.map((res) => {
               // Construct direct file URL or external URL
               const downloadUrl = res.file 
-                ? `http://127.0.0.1:8000${res.file}` 
+                ? `${res.file}` 
                 : res.external_url;
 
               return (

@@ -124,7 +124,7 @@ export default function ChatComponent() {
       // 2. Establish connection to WebSocket server using Native WebSockets
       const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       // Fallback/standard host is 127.0.0.1:8000 as per technical specs
-      const wsHost = '127.0.0.1:8000';
+      const wsHost = window.location.host;
       const wsUrl = chatType === 'direct'
         ? `${wsProtocol}://${wsHost}/ws/chat/${targetId}/?token=${token}`
         : `${wsProtocol}://${wsHost}/ws/group/${targetId}/?token=${token}`;

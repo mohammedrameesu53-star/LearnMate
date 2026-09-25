@@ -411,7 +411,7 @@ export default function AdminCourses() {
                                             <div className="mt-2 space-y-1.5">
                                               {lesson.resources.map((res) => {
                                                 const downloadUrl = res.file
-                                                  ? `http://127.0.0.1:8000${res.file}`
+                                                  ? `${res.file}`
                                                   : res.external_url;
                                                 return (
                                                   <a
