@@ -8,3 +8,4 @@ backend/.env
 ai-service/.env
 backend/.env
 ai-service/.env
+ai-service/chroma_data/
