@@ -22,7 +22,10 @@ from .views.mentors import (AdminMentorListAPIView,
 from .views.students import (AdminStudentListAPIView,
                              AdminStudentDetailAPIView,
                              AdminStudentStatusAPIView,
-                             AdminStudentDeleteAPIView)                            
+                             AdminStudentDeleteAPIView)     
+
+# pyrefly: ignore [missing-import]
+from apps.accounts.views import MentorInviteView                                                  
 
 urlpatterns = [
 
@@ -51,5 +54,7 @@ urlpatterns = [
     path("students/<uuid:student_id>/",AdminStudentDetailAPIView.as_view(),),
     path("students/<uuid:student_id>/status/",AdminStudentStatusAPIView.as_view(),),
     path("students/<uuid:student_id>/delete/",AdminStudentDeleteAPIView.as_view(),),
+
+    path("mentors/invite/", MentorInviteView.as_view()),
 
 ]
